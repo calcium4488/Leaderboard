@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>leaderboard</title>
+<style>
+:root{--bg:#f5f6f8;--fg:#1c2330;--card:#fff;--mut:#667085;--line:#e3e6ec;--ac:#2f6feb;--on:#fff;--dg:#d92d20;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161d;--fg:#e8ebf1;--card:#1b212b;--mut:#98a2b3;--line:#2b3340;--ac:#6b9bff;--on:#0d1117;--dg:#f97066}}
+:root[data-theme="dark"]{--bg:#12161d;--fg:#e8ebf1;--card:#1b212b;--mut:#98a2b3;--line:#2b3340;--ac:#6b9bff;--on:#0d1117;--dg:#f97066}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.6 system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+#app{max-width:760px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+h1{font-size:22px;margin:0}h2{font-size:16px;margin:0 0 8px}
+.mut,small{color:var(--mut)}small{margin-left:6px}
+button,input{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:6px 12px;cursor:pointer}
+button.on,button.pri{background:var(--ac);color:var(--on);border-color:var(--ac)}
+button.del{color:var(--dg);padding:2px 8px;font-size:13px}
+input[type=text],input:not([type]),input[type=number]{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px;min-width:0}
+nav,.seg,.row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.row input:not([type=number]){flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:16px;overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+th{color:var(--mut);font-size:12px;font-weight:600}
+tr:last-child td{border-bottom:0}
+.num,.rk{font-variant-numeric:tabular-nums;font-weight:700}.num{text-align:right}
+.r1{color:#d4a017}.r2{color:#8a94a6}.r3{color:#b26a2e}
+.item{border-top:1px solid var(--line);padding:8px 0}
+.hd input{flex:1;font-weight:700}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.chk{display:flex;flex-direction:column;gap:4px;margin-top:4px}.chk label{display:flex;align-items:center;gap:6px}
+.ai{flex-wrap:wrap;display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid var(--line)}
+.ai span{flex:1}.ai input{width:70px}.ai input.lv{width:100px}
+.card.tb{max-width:680px}.nw{white-space:nowrap}.dd{position:absolute;right:0;top:100%;z-index:5;display:flex;flex-direction:column;gap:4px;padding:8px;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.18)}.dd button{text-align:left}.pn{font-weight:700;font-size:1.1em}.lk{cursor:pointer;text-decoration:underline dotted}
+.cl{flex-basis:100%;display:flex;align-items:center;gap:6px;padding-bottom:4px}
+.cl input[type=color]{width:36px;height:26px;padding:0;border:0;background:none}
+.cl select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
+#msg{color:var(--dg)}
+</style></head>
+<body>
+<div id="app"></div>
+<script>document.write('<script src="data.js?t='+Date.now()+'"><\/script>')</script>
+<script>
+const S=window.DATA||{title:'leaderboard',cats:[],achs:[],players:[]};
+let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',menu=false,tab='pl',page=0,PS=50,armed='',msg='';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const v=id=>document.getElementById(id).value.trim();
+const achs=c=>S.achs.filter(a=>a.c===c); // 配列の順 = 難易度の高い順
+const okId=n=>/^[A-Za-z0-9]+$/.test(n),ERR='MCIDは半角の英字と数字のみ使用できます。';
+const dup=(n,id)=>S.players.some(p=>p.id!==id&&p.name.toLowerCase()===n.toLowerCase());
+const arm=id=>{if(armed!==id){armed=id;return true}armed='';return false};
+const delBtn=(a,id)=>`<button class="del" data-a="${a}" data-id="${id}">${armed===id?'本当に削除':'削除'}</button>`;
+
+const RB='linear-gradient(90deg,#ffa8b8,#ffc999,#f0e08a,#a9e3b0,#9fd8f3,#c0b2f0)';
+const clip=g=>`background:${g};-webkit-background-clip:text;background-clip:text;color:transparent`;
+function pn(a,lv){const k=a.col||{};let st='';
+  if(k.t==='s')st=`color:${k.c1||'#e5484d'}`;
+  else if(k.t==='g')st=clip(`linear-gradient(90deg,${k.c1||'#e5484d'},${k.c2||'#3b82f6'})`);
+  else if(k.t==='r')st=clip(RB);
+  return `<span class="pn" style="${st}">${esc(a.name)+(lv&&a.lv?' | '+esc(a.lv):'')}</span>`}
+function rank(c){
+  const as=achs(c),ix=Object.fromEntries(as.map((a,i)=>[a.id,i]));
+  return S.players.map(p=>{const got=as.filter(a=>p.g.includes(a.id));
+    return{p,got,pt:got.reduce((s,a)=>s+a.pt,0),ix:got.map(a=>ix[a.id])}});
+}
+function cmpAch(x,y){
+  for(let i=0;i<Math.min(x.ix.length,y.ix.length);i++)if(x.ix[i]!==y.ix[i])return x.ix[i]-y.ix[i];
+  return y.ix.length-x.ix.length;
+}
+function table(c){
+  const cm=mode==='pt'?(a,b)=>b.pt-a.pt||cmpAch(a,b):(a,b)=>cmpAch(a,b)||b.pt-a.pt;
+  const r=rank(c.id).filter(x=>x.pt>0).sort(cm);
+  if(!r.length)return '<p class="mut">ランキング対象のMCIDがまだいません。</p>';
+  const pages=Math.ceil(r.length/PS);page=Math.min(page,pages-1);
+  const pager=pages>1?`<div class="seg" style="justify-content:center;align-items:center"><button data-a="pg" data-id="-1" ${page===0?'disabled':''}>← 前へ</button><span class="mut">${page+1} / ${pages}</span><button data-a="pg" data-id="1" ${page>=pages-1?'disabled':''}>次へ →</button></div>`:'';
+  let n=0;
+  const rows=r.map((x,i)=>{if(i===0||cm(r[i-1],x)!==0)n=i+1;
+    return i<page*PS||i>=(page+1)*PS?'':`<tr><td class="rk r${n}">${n}</td><td><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></td>${mode==='pt'?`<td class="num">${x.pt}</td>`:`<td class="nw" style="text-align:right">${x.got[0]?pn(x.got[0],1):'-'}</td>`}</tr>`}).join('');
+  return `<div class="card tb"><table><colgroup><col style="width:40px"><col><col></colgroup><thead><tr><th></th><th>MCID</th>${mode==='pt'?'<th style="text-align:right">point</th>':'<th style="text-align:right">progress</th>'}</tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
+}
+function lvTable(c){
+  const as=achs(c.id);
+  if(!as.length)return '<p class="mut">progressがまだありません。</p>';
+  return `<div class="card tb"><table><thead><tr><th>progress</th><th style="text-align:right">exp</th></tr></thead><tbody>${as.map(a=>`<tr><td class="nw">${pn(a,1)}</td><td class="num">${a.pt}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function profile(){
+  const ps=[...S.players].sort((a,b)=>a.name.localeCompare(b.name));
+  const p=S.players.find(x=>x.id===pid);
+  let h=`<div class="row"><input id="pq" list="pl" placeholder="MCID" value="${p?esc(p.name):''}" data-c="pick"><datalist id="pl">${ps.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></div>`;
+  if(!p)return h+'<p class="mut">MCIDを入力または選択してください。</p>';
+  const tl=[];
+  const secs=S.cats.map(c=>{const as=achs(c.id).filter(a=>p.g.includes(a.id));if(!as.length)return '';
+    tl.push([c.name,as.reduce((s,a)=>s+a.pt,0)]);
+    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${as.map(a=>`<tr><td class="nw">${pn(a,1)}</td><td class="num">${a.pt}</td></tr>`).join('')}</tbody></table></div>`}).join('');
+  const tot=tl.length?`<div class="card tb"><table><thead><tr><th>total exp</th><th class="num" style="color:var(--fg);font-size:inherit">${tl.reduce((s,x)=>s+x[1],0)}</th></tr></thead><tbody>${tl.map(x=>`<tr><td>${esc(x[0])}</td><td class="num">${x[1]}</td></tr>`).join('')}</tbody></table></div>`:'';
+  return h+`<h2>${esc(p.name)}</h2>`+(secs?secs+tot:'<p class="mut">獲得したprogressはまだありません。</p>');
+}
+function clSel(a){const k=a.col||{},t=k.t||'';
+  return `<div class="cl"><select data-c="ct" data-id="${a.id}">${[['','色なし'],['s','単色'],['g','グラデーション'],['r','薄い虹色']].map(([v,l])=>`<option value="${v}"${t===v?' selected':''}>${l}</option>`).join('')}</select>${t==='s'||t==='g'?`<input type="color" data-c="c1" data-id="${a.id}" value="${k.c1||'#e5484d'}">`:''}${t==='g'?`<input type="color" data-c="c2" data-id="${a.id}" value="${k.c2||'#3b82f6'}">`:''}</div>`}
+function adminPanel(c){
+  const T=[['pl','MCID'],['ac','progress'],['ct','分野・設定']];
+  let h=`<section class="card"><h2>管理者メニュー</h2>${msg?`<p id="msg">${esc(msg)}</p>`:''}<div class="seg">${T.map(([k,l])=>`<button data-a="tab" data-id="${k}" class="${tab===k?'on':''}">${l}</button>`).join('')}</div>`;
+  if(tab==='ct'){
+    h+=`<div class="row"><input id="nc" placeholder="新しい分野"><button class="pri" data-a="addCat">分野を追加</button></div>`;
+    h+=S.cats.map(x=>`<div class="ai"><span>${esc(x.name)}</span>${delBtn('delCat',x.id)}</div>`).join('');
+  }else if(!c){h+='<p class="mut">先に「分野・設定」で分野を追加してください。</p>'}
+  else if(tab==='ac'){
+    h+=`<p class="mut">「${esc(c.name)}」のprogress。上ほど難易度が高くなります。追加すると、expの高い順に自動で並びます(↑↓で手動でも並べ替えできます)。</p><div class="seg"><button data-a="sortAch">expの高い順に並べ替え</button></div>
+    <div class="row"><input id="na" placeholder="progress"><input id="nl" placeholder="difficult 例: VICTOR"><input id="nt" type="number" min="0" placeholder="exp" style="width:80px"><button class="pri" data-a="addAch">追加</button></div>`;
+    h+=achs(c.id).map(a=>`<div class="ai"><button data-a="mv" data-id="${a.id}" data-d="-1">↑</button><button data-a="mv" data-id="${a.id}" data-d="1">↓</button><span>${pn(a)}</span><input class="lv" value="${esc(a.lv||'')}" placeholder="difficult" data-c="lv" data-id="${a.id}"><input type="number" min="0" value="${a.pt}" data-c="pt" data-id="${a.id}">exp${delBtn('delAch',a.id)}${clSel(a)}</div>`).join('');
+  }else{
+    const p=S.players.find(x=>x.id===ap);
+    h+=`<p class="mut">① MCIDを追加 → ② 下の一覧からMCIDを選ぶ → ③ 獲得したprogressにチェック(expが加算されます)</p>
+    <div class="row"><input id="np" placeholder="MCID"><button class="pri" data-a="addPl">追加</button></div>
+    <div class="seg">${[...S.players].sort((x,y)=>x.name.localeCompare(y.name)).map(x=>`<button data-a="selPl" data-id="${x.id}" class="${x.id===ap?'on':''}">${esc(x.name)}</button>`).join('')||'<span class="mut">MCIDがまだいません</span>'}</div>`;
+    if(p){
+      h+=`<div class="item"><div class="hd"><input value="${esc(p.name)}" data-c="rename" data-id="${p.id}">${delBtn('delPl',p.id)}</div>`;
+      h+=S.cats.map(k=>`<b style="display:block;margin-top:8px">${esc(k.name)}</b><div class="chk">${achs(k.id).map(a=>`<label><input type="checkbox" data-c="own" data-id="${a.id}" data-p="${p.id}" ${p.g.includes(a.id)?'checked':''}>${pn(a,1)}<small>${a.pt}exp</small></label>`).join('')||'<span class="mut">progressが未登録です</span>'}</div>`).join('')+'</div>';
+    }else if(S.players.length)h+='<p class="mut">MCIDを選択してください。</p>';
+  }
+  return h+'</section>';
+}
+function render(){
+  if(admin&&dirty)try{localStorage.setItem('lb-draft',JSON.stringify(S))}catch(e){}
+  const c=S.cats.find(x=>x.id===cat)||S.cats[0];cat=c&&c.id;
+  let h=`<header style="justify-content:flex-end;position:relative"><div class="seg" style="margin:0;justify-content:flex-end">${dirty?'<button class="pri" data-a="pub" id="pub">data.jsを書き出す</button>':''}${admin?`<button data-a="view" data-id="admin" class="${view==='admin'?'on':''}">管理者メニュー</button>`:''}<button data-a="menu" aria-label="menu" class="${menu?'on':''}">☰</button></div>${menu?`<div class="dd">${[['board','leaderboard'],['list','prog role list'],['profile','profile']].map(([k,l])=>`<button data-a="view" data-id="${k}" class="${view===k?'on':''}">${l}</button>`).join('')}</div>`:''}</header>`;
+  if(view!=='profile')h+=`<nav>${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')}</nav>`;
+  if(view==='admin'&&admin)h+=adminPanel(c);
+  else if(view==='profile')h+=profile();
+  else if(!c)h+='<p class="mut">分野がまだありません。</p>';
+  else if(view==='list')h+=lvTable(c);
+  else h+=`<div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">point</button><button data-a="mode" data-id="ac" class="${mode==='ac'?'on':''}">highest role</button></div>`+table(c);
+  $('#app').innerHTML=h;
+}
+const A={
+  view(id){view=id;menu=false},menu(){menu=!menu},selPl(id){ap=id},sortAch(){const ix=[];S.achs.forEach((a,i)=>{if(a.c===cat)ix.push(i)});const l=ix.map(i=>S.achs[i]).sort((x,y)=>y.pt-x.pt);ix.forEach((i,k)=>{S.achs[i]=l[k]});dirty=true},prof(id){pid=id;view='profile'},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
+  addCat(){const n=v('nc');if(n){const id=uid();S.cats.push({id,name:n});cat=id;dirty=true}},
+  addAch(){const n=v('na');if(n&&cat){const pt=Math.max(0,+v('nt')||0),o={id:uid(),c:cat,name:n,lv:v('nl'),pt},nx=achs(cat).find(a=>a.pt<pt);nx?S.achs.splice(S.achs.indexOf(nx),0,o):S.achs.push(o);dirty=true}},
+  addPl(){const n=v('np');if(!n)return;if(!okId(n))return void(msg=ERR);if(dup(n))return void(msg='同じMCIDは追加できません。');const q={id:uid(),name:n,g:[]};S.players.push(q);ap=q.id;dirty=true},
+  mv(id,el){const l=achs(cat),i=l.findIndex(a=>a.id===id),j=i+ +el.dataset.d;if(j<0||j>=l.length)return;
+    const gi=S.achs.indexOf(l[i]),gj=S.achs.indexOf(l[j]);[S.achs[gi],S.achs[gj]]=[S.achs[gj],S.achs[gi]];dirty=true},
+  delCat(id){if(arm(id))return;S.cats=S.cats.filter(c=>c.id!==id);S.achs=S.achs.filter(a=>a.c!==id);dirty=true},
+  delAch(id){if(arm(id))return;S.achs=S.achs.filter(a=>a.id!==id);S.players.forEach(p=>p.g=p.g.filter(g=>g!==id));dirty=true},
+  delPl(id){if(arm(id))return;if(ap===id)ap='';S.players=S.players.filter(p=>p.id!==id);dirty=true},
+  pub(){
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob(['window.DATA='+JSON.stringify(S)+';\n'],{type:'text/javascript'}));
+    a.download='data.js';a.click();dirty=false;
+    try{localStorage.removeItem('lb-draft')}catch(e){}
+    msg='data.jsを書き出しました。公開サイトのdata.jsを、このファイルに置き換えてください。';
+  }
+};
+const C={
+  ct(id,el){const a=S.achs.find(a=>a.id===id);a.col={...(a.col||{}),t:el.value};dirty=true},
+  c1(id,el){const a=S.achs.find(a=>a.id===id);a.col={...(a.col||{}),c1:el.value};dirty=true},
+  c2(id,el){const a=S.achs.find(a=>a.id===id);a.col={...(a.col||{}),c2:el.value};dirty=true},
+  pick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());pid=p?p.id:''},
+  lv(id,el){S.achs.find(a=>a.id===id).lv=el.value.trim();dirty=true},
+  rename(id,el){const n=el.value.trim();if(!n)return;if(!okId(n)){msg=ERR;return}if(dup(n,id)){msg='同じMCIDがいるため変更できません。';return}S.players.find(p=>p.id===id).name=n;dirty=true},
+  pt(id,el){S.achs.find(a=>a.id===id).pt=Math.max(0,+el.value||0);dirty=true},
+  own(id,el){const p=S.players.find(p=>p.id===el.dataset.p);
+    p.g=el.checked?[...new Set([...p.g,id])]:p.g.filter(x=>x!==id);dirty=true},
+  title(_,el){S.title=el.value.trim()||S.title;dirty=true}
+};
+$('#app').addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;
+  const a=el.dataset.a;if(!a.startsWith('del'))armed='';if(a!=='menu')menu=false;
+  msg='';const r=A[a](el.dataset.id,el);render();
+});
+$('#app').addEventListener('change',e=>{
+  const el=e.target.closest('[data-c]');if(!el)return;
+  msg='';C[el.dataset.c](el.dataset.id,el);render();
+});
+if(admin)try{const d=localStorage.getItem('lb-draft');if(d){Object.assign(S,JSON.parse(d));dirty=true}}catch(e){}
+render();
+</script>
+</body></html>
