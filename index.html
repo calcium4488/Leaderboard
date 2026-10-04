@@ -34,6 +34,17 @@ tr:last-child td{border-bottom:0}
 .ai{flex-wrap:wrap;display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid var(--line)}
 .ai span{flex:1}.ai input{width:70px}.ai input.lv{width:100px}
 .card.tb{max-width:680px}.nw{white-space:nowrap}.dd{position:absolute;right:0;top:100%;z-index:5;display:flex;flex-direction:column;gap:4px;padding:8px;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.18)}.dd button{text-align:left}.pn{font-weight:700;font-size:1.1em}.lk{cursor:pointer;text-decoration:underline dotted}
+.pb{display:inline-block;padding:1px 8px;border-radius:6px;line-height:1.45}
+.gr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:5px 0;border-top:1px solid var(--line)}.gl{display:flex;align-items:center;gap:6px}
+.gr select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
+.rb{font-weight:700;color:var(--mut)}
+.item.pg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
+.pgh{display:flex;align-items:center;gap:10px;cursor:pointer;padding:2px 0}.pgh .ar{margin-left:auto;color:var(--mut)}
+.sec{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.sh{font-weight:700;font-size:13px;color:var(--mut);margin-bottom:4px}
+div.rb{flex-wrap:wrap}.rbt{display:flex;align-items:center;gap:6px}.rbc{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.rb .cl{justify-content:center}
+.rb input{width:130px}.rb select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
+div.rb{display:flex;justify-content:center;align-items:center;gap:10px;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);padding:2px 0;margin:6px 0}
+tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px dashed var(--line);padding:2px 6px}
 .cl{flex-basis:100%;display:flex;align-items:center;gap:6px;padding-bottom:4px}
 .cl input[type=color]{width:36px;height:26px;padding:0;border:0;background:none}
 .cl select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
@@ -43,29 +54,67 @@ tr:last-child td{border-bottom:0}
 <div id="app"></div>
 <script>document.write('<script src="data.js?t='+Date.now()+'"><\/script>')</script>
 <script>
-const S=window.DATA||{title:'leaderboard',cats:[],achs:[],players:[]};
-let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',menu=false,tab='pl',page=0,PS=50,armed='',msg='';
+const S=window.DATA||{title:'leaderboard',cats:[],progs:[],players:[]};
+mig(S);
+let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
 const v=id=>document.getElementById(id).value.trim();
-const achs=c=>S.achs.filter(a=>a.c===c); // 配列の順 = 難易度の高い順
 const okId=n=>/^[A-Za-z0-9]+$/.test(n),ERR='MCIDは半角の英字と数字のみ使用できます。';
 const dup=(n,id)=>S.players.some(p=>p.id!==id&&p.name.toLowerCase()===n.toLowerCase());
 const arm=id=>{if(armed!==id){armed=id;return true}armed='';return false};
 const delBtn=(a,id)=>`<button class="del" data-a="${a}" data-id="${id}">${armed===id?'本当に削除':'削除'}</button>`;
 
-const RB='linear-gradient(90deg,#ffa8b8,#ffc999,#f0e08a,#a9e3b0,#9fd8f3,#c0b2f0)';
+const RBC=['#ffa8b8','#ffc999','#f0e08a','#a9e3b0','#9fd8f3','#c0b2f0'],RB='linear-gradient(90deg,'+RBC.join(',')+')';
 const clip=g=>`background:${g};-webkit-background-clip:text;background-clip:text;color:transparent`;
-function pn(a,lv){const k=a.col||{};let st='';
-  if(k.t==='s')st=`color:${k.c1||'#e5484d'}`;
-  else if(k.t==='g')st=clip(`linear-gradient(90deg,${k.c1||'#e5484d'},${k.c2||'#3b82f6'})`);
-  else if(k.t==='r')st=clip(RB);
-  return `<span class="pn" style="${st}">${esc(a.name)+(lv&&a.lv?' | '+esc(a.lv):'')}</span>`}
+const hx=h=>{const m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return[128,128,128];const n=parseInt(m[1],16);return[n>>16&255,n>>8&255,n&255]};
+const rl=c=>{const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2])};
+const cr=(a,b)=>{const x=rl(a),y=rl(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+const mx=(c,t,k)=>c.map(v=>Math.round(v*(1-k)+t*k));
+const pdark=()=>{try{const t=document.documentElement.getAttribute('data-theme');return t==='dark'||(t!=='light'&&typeof matchMedia==='function'&&matchMedia('(prefers-color-scheme: dark)').matches)}catch(e){return false}};
+const bl=(c,a,b)=>c.map((v,i)=>Math.round(b[i]*(1-a)+v*a));
+const rgb=c=>`rgb(${c.join(',')})`;
+function fixc(c,base){const dk=base[0]<128,bg=bl(c,.16,base);for(let k=0;k<=1;k+=.1){const x=mx(c,dk?255:0,k);if(cr(x,bg)>=3)return x}return mx(c,dk?255:0,1)}
+function pn(a,lv){const k=a.col||{};let st='',bgc='';
+  const base=pdark()?[27,33,43]:[255,255,255];
+  const sp=k.t==='s'?[hx(k.c1||'#e5484d')]:k.t==='g'?[hx(k.c1||'#e5484d'),hx(k.c2||'#3b82f6')]:k.t==='r'?RBC.map(hx):null;
+  if(sp){
+    const fx=sp.map(c=>fixc(c,base)),tint=c=>`rgba(${c.join(',')},.16)`;
+    st=sp.length===1?`color:${rgb(fx[0])}`:clip(`linear-gradient(90deg,${fx.map(rgb).join(',')})`);
+    bgc=sp.length===1?tint(sp[0]):`linear-gradient(90deg,${sp.map(tint).join(',')})`;
+  }
+  const t=`<span class="pn" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
+  return sp?`<span class="pb" style="background:${bgc}">${t}</span>`:t}
+const gp=id=>S.progs.find(x=>x.id===id);
+const gtop=g=>g.st.length?Math.max(...g.st.map(s=>s.e)):0;
+const P=cid=>S.progs.filter(g=>g.c===cid).sort((a,b)=>gtop(b)-gtop(a));
+function fs(id){for(const g of S.progs){const i=g.st.findIndex(s=>s.id===id);if(i>=0)return{g,s:g.st[i],i}}return null}
+const rcol=(g,r)=>r&&r.col&&r.col.t?r.col:g.col;
+const fr=id=>{for(const g of S.progs){const r=g.roles.find(x=>x.id===id);if(r)return r}return null};
+function normR(S){S.progs.forEach(g=>{g.roles=(g.roles||[]).map(r=>typeof r==='string'?{id:'r'+r,at:r,n:((g.st.find(s=>s.id===r)||{}).n)||g.name}:r)})}
+function roleOf(g,sid){const i=g.st.findIndex(s=>s.id===sid);if(i<0)return null;let r=null,bi=-1;g.roles.forEach(x=>{const k=g.st.findIndex(s=>s.id===x.at);if(k>=0&&k<=i&&k>=bi){r=x;bi=k}});return r}
+function mig(S){
+  if(S.progs){normR(S);return}
+  S.progs=[];const m={};
+  (S.achs||[]).forEach(a=>{const k=a.c+'|'+String(a.name).trim().toLowerCase();(m[k]=m[k]||[]).push(a)});
+  Object.values(m).forEach(L=>{
+    const vic=a=>/^victor$/i.test(a.lv||''),mid=a=>a.mid!==undefined?!!a.mid:(!vic(a)&&L.some(vic));
+    const st=[...L].sort((x,y)=>x.pt-y.pt),f=L.find(a=>a.col&&a.col.t)||L[0];
+    S.progs.push({id:'g'+L[0].id,c:L[0].c,name:String(L[0].name).trim(),col:f.col||{},st:st.map(a=>({id:a.id,n:a.lv||'',e:a.pt})),roles:st.filter(a=>!mid(a)).map(a=>a.id)});
+  });
+  (S.players||[]).forEach(p=>{const g=p.g||[];p.pr={};
+    S.progs.forEach(pg=>{const own=pg.st.filter(s=>g.includes(s.id));if(own.length)p.pr[pg.id]=own.reduce((a,b)=>b.e>a.e?b:a).id});
+    delete p.g});
+  delete S.achs;
+  normR(S);
+}
 function rank(c){
-  const as=achs(c),ix=Object.fromEntries(as.map((a,i)=>[a.id,i]));
-  return S.players.map(p=>{const got=as.filter(a=>p.g.includes(a.id));
-    return{p,got,pt:got.reduce((s,a)=>s+a.pt,0),ix:got.map(a=>ix[a.id])}});
+  const gs=P(c);
+  return S.players.map(p=>{let pt=0;const ro=[];
+    gs.forEach(g=>{const sid=p.pr&&p.pr[g.id],s=sid&&g.st.find(x=>x.id===sid);if(!s)return;pt+=s.e;const r=roleOf(g,sid);if(r){const rs=g.st.find(x=>x.id===r.at);ro.push({g,r,e:rs?rs.e:0})}});
+    ro.sort((a,b)=>b.e-a.e);
+    return{p,pt,got:ro,ix:ro.map(x=>-x.e)}});
 }
 function cmpAch(x,y){
   for(let i=0;i<Math.min(x.ix.length,y.ix.length);i++)if(x.ix[i]!==y.ix[i])return x.ix[i]-y.ix[i];
@@ -79,13 +128,15 @@ function table(c){
   const pager=pages>1?`<div class="seg" style="justify-content:center;align-items:center"><button data-a="pg" data-id="-1" ${page===0?'disabled':''}>← 前へ</button><span class="mut">${page+1} / ${pages}</span><button data-a="pg" data-id="1" ${page>=pages-1?'disabled':''}>次へ →</button></div>`:'';
   let n=0;
   const rows=r.map((x,i)=>{if(i===0||cm(r[i-1],x)!==0)n=i+1;
-    return i<page*PS||i>=(page+1)*PS?'':`<tr><td class="rk r${n}">${n}</td><td><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></td>${mode==='pt'?`<td class="num">${x.pt}</td>`:`<td class="nw" style="text-align:right">${x.got[0]?pn(x.got[0],1):'-'}</td>`}</tr>`}).join('');
+    return i<page*PS||i>=(page+1)*PS?'':`<tr><td class="rk r${n}">${n}</td><td><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></td>${mode==='pt'?`<td class="num">${x.pt}</td>`:`<td class="nw" style="text-align:right">${x.got[0]?pn({name:x.got[0].g.name,col:rcol(x.got[0].g,x.got[0].r),lv:x.got[0].r.n},1):'-'}</td>`}</tr>`}).join('');
   return `<div class="card tb"><table><colgroup><col style="width:40px"><col><col></colgroup><thead><tr><th></th><th>MCID</th>${mode==='pt'?'<th style="text-align:right">point</th>':'<th style="text-align:right">progress</th>'}</tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
 }
 function lvTable(c){
-  const as=achs(c.id);
-  if(!as.length)return '<p class="mut">progressがまだありません。</p>';
-  return `<div class="card tb"><table><thead><tr><th>progress</th><th style="text-align:right">exp</th></tr></thead><tbody>${as.map(a=>`<tr><td class="nw">${pn(a,1)}</td><td class="num">${a.pt}</td></tr>`).join('')}</tbody></table></div>`;
+  const rows=[];
+  P(c.id).forEach(g=>g.roles.forEach(r=>{const s=g.st.find(x=>x.id===r.at);if(s)rows.push({g,r,e:s.e})}));
+  if(!rows.length)return '<p class="mut">ロールがまだありません。</p>';
+  rows.sort((a,b)=>b.e-a.e);
+  return `<div class="card tb"><table><thead><tr><th>progress</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1)}</td><td class="num">${x.e}</td></tr>`).join('')}</tbody></table></div>`;
 }
 function profile(){
   const ps=[...S.players].sort((a,b)=>a.name.localeCompare(b.name));
@@ -93,14 +144,31 @@ function profile(){
   let h=`<div class="row"><input id="pq" list="pl" placeholder="MCID" value="${p?esc(p.name):''}" data-c="pick"><datalist id="pl">${ps.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></div>`;
   if(!p)return h+'<p class="mut">MCIDを入力または選択してください。</p>';
   const tl=[];
-  const secs=S.cats.map(c=>{const as=achs(c.id).filter(a=>p.g.includes(a.id));if(!as.length)return '';
-    tl.push([c.name,as.reduce((s,a)=>s+a.pt,0)]);
-    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${as.map(a=>`<tr><td class="nw">${pn(a,1)}</td><td class="num">${a.pt}</td></tr>`).join('')}</tbody></table></div>`}).join('');
+  const secs=S.cats.map(c=>{
+    const rows=P(c.id).map(g=>{const sid=p.pr&&p.pr[g.id],s=sid&&g.st.find(x=>x.id===sid);return s?{g,s,r:roleOf(g,sid)}:null}).filter(Boolean);
+    if(!rows.length)return '';
+    tl.push([c.name,rows.reduce((a,x)=>a+x.s.e,0)]);
+    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${x.r?pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1):pn(x.g)}${/^victor$/i.test(x.s.n||'')?'':`<small>セクション: ${esc(x.s.n||'—')}</small>`}</td><td class="num">${x.s.e}</td></tr>`).join('')}</tbody></table></div>`}).join('');
   const tot=tl.length?`<div class="card tb"><table><thead><tr><th>total exp</th><th class="num" style="color:var(--fg);font-size:inherit">${tl.reduce((s,x)=>s+x[1],0)}</th></tr></thead><tbody>${tl.map(x=>`<tr><td>${esc(x[0])}</td><td class="num">${x[1]}</td></tr>`).join('')}</tbody></table></div>`:'';
   return h+`<h2>${esc(p.name)}</h2>`+(secs?secs+tot:'<p class="mut">獲得したprogressはまだありません。</p>');
 }
-function clSel(a){const k=a.col||{},t=k.t||'';
-  return `<div class="cl"><select data-c="ct" data-id="${a.id}">${[['','色なし'],['s','単色'],['g','グラデーション'],['r','薄い虹色']].map(([v,l])=>`<option value="${v}"${t===v?' selected':''}>${l}</option>`).join('')}</select>${t==='s'||t==='g'?`<input type="color" data-c="c1" data-id="${a.id}" value="${k.c1||'#e5484d'}">`:''}${t==='g'?`<input type="color" data-c="c2" data-id="${a.id}" value="${k.c2||'#3b82f6'}">`:''}</div>`}
+function clSel(o,p){p=p||'';const k=o.col||{},t=k.t||'';
+  return `<div class="cl"><select data-c="${p}ct" data-id="${o.id}">${[['','色なし'],['s','単色'],['g','グラデーション'],['r','薄い虹色']].map(([v,l])=>`<option value="${v}"${t===v?' selected':''}>${l}</option>`).join('')}</select>${t==='s'||t==='g'?`<input type="color" data-c="${p}c1" data-id="${o.id}" value="${k.c1||'#e5484d'}">`:''}${t==='g'?`<input type="color" data-c="${p}c2" data-id="${o.id}" value="${k.c2||'#3b82f6'}">`:''}</div>`}
+function progEd(g){
+  const n=g.st.length,open=!!og[g.id];
+  const head=`<div class="pgh" data-a="togg" data-id="${g.id}">${pn(g)}<small>${n} stage / ${g.roles.length} ロール</small><span class="ar">${open?'▲':'▼'}</span></div>`;
+  if(!open)return `<div class="item pg">${head}</div>`;
+  const so=sel=>g.st.map(s=>`<option value="${s.id}"${s.id===sel?' selected':''}>${esc(s.n||'—')} (${s.e} exp)</option>`).join('');
+  const rows=g.st.map((s,i)=>g.roles.filter(r=>r.at===s.id).map(r=>`<div class="rb"><div class="rbt">${i===n-1?'攻略ロール':'ロール'} ${pn({name:r.n||'ロール',col:rcol(g,r)})}</div><div class="rbc"><input value="${esc(r.n)}" placeholder="ロール名 例: VICTOR" data-c="rname" data-id="${r.id}"><select data-c="rat" data-id="${r.id}">${so(r.at)}</select>から${delBtn('delRole',r.id)}</div>${clSel(r,'r')}</div>`).join('')+
+    `<div class="ai"><button data-a="mvSt" data-id="${s.id}" data-d="-1">↑</button><button data-a="mvSt" data-id="${s.id}" data-d="1">↓</button><input class="lv" value="${esc(s.n)}" placeholder="stage" data-c="stn" data-id="${s.id}"><input type="number" min="0" value="${s.e}" data-c="ste" data-id="${s.id}">exp${delBtn('delSt',s.id)}</div>`).join('');
+  const rf=n?`<div class="row" style="margin-top:6px"><input id="rn_${g.id}" placeholder="ロール名 例: VICTOR"><select id="rs_${g.id}">${so('')}</select><button class="pri" data-a="addRole" data-id="${g.id}">ロールを作成</button></div>`:'<p class="mut">先にstageを追加してください。</p>';
+  return `<div class="item pg">${head}
+    <div class="sec"><div class="sh">基本</div><div class="hd"><input value="${esc(g.name)}" data-c="pgn" data-id="${g.id}">${delBtn('delProg',g.id)}</div><div class="mut" style="margin-top:4px">表示色(progress全体)</div>${clSel(g)}</div>
+    <div class="sec"><div class="sh">全体の流れ(上から下へ、易しい順)</div>${rows||'<p class="mut">stageを追加してください。</p>'}<div class="row" style="margin-top:6px"><input id="sn_${g.id}" placeholder="stage 例: s1"><input id="se_${g.id}" type="number" min="0" placeholder="exp" style="width:80px"><button class="pri" data-a="addSt" data-id="${g.id}">stageを追加</button></div></div>
+    <div class="sec"><div class="sh">ロール</div><p class="mut">VICTORのようなロールを、名前を付けて作成します。ロールは、選んだstageから次のロールの手前まで続きます(帯が位置を表します)。途中経過のロールも含め、帯の中で色を変えられます(未設定ならprogressの色)。</p>${rf}</div></div>`}
+function prRow(p,g){
+  const sid=p.pr[g.id],r=sid?roleOf(g,sid):null;
+  return `<div class="gr"><span class="gl">${pn(g)}</span><select data-c="setst" data-p="${p.id}" data-id="${g.id}"><option value="">— 未着手</option>${g.st.map(s=>`<option value="${s.id}"${sid===s.id?' selected':''}>${esc(s.n||'—')} - ${s.e} exp</option>`).join('')}</select><small>${r?'ロール: '+esc(r.n||g.name):'ロールなし'}</small><button class="del" data-a="rmPr" data-p="${p.id}" data-id="${g.id}">外す</button></div>`}
 function adminPanel(c){
   const T=[['pl','MCID'],['ac','progress'],['ct','分野・設定']];
   let h=`<section class="card"><h2>管理者メニュー</h2>${msg?`<p id="msg">${esc(msg)}</p>`:''}<div class="seg">${T.map(([k,l])=>`<button data-a="tab" data-id="${k}" class="${tab===k?'on':''}">${l}</button>`).join('')}</div>`;
@@ -109,17 +177,20 @@ function adminPanel(c){
     h+=S.cats.map(x=>`<div class="ai"><span>${esc(x.name)}</span>${delBtn('delCat',x.id)}</div>`).join('');
   }else if(!c){h+='<p class="mut">先に「分野・設定」で分野を追加してください。</p>'}
   else if(tab==='ac'){
-    h+=`<p class="mut">「${esc(c.name)}」のprogress。上ほど難易度が高くなります。追加すると、expの高い順に自動で並びます(↑↓で手動でも並べ替えできます)。</p><div class="seg"><button data-a="sortAch">expの高い順に並べ替え</button></div>
-    <div class="row"><input id="na" placeholder="progress"><input id="nl" placeholder="difficult 例: VICTOR"><input id="nt" type="number" min="0" placeholder="exp" style="width:80px"><button class="pri" data-a="addAch">追加</button></div>`;
-    h+=achs(c.id).map(a=>`<div class="ai"><button data-a="mv" data-id="${a.id}" data-d="-1">↑</button><button data-a="mv" data-id="${a.id}" data-d="1">↓</button><span>${pn(a)}</span><input class="lv" value="${esc(a.lv||'')}" placeholder="difficult" data-c="lv" data-id="${a.id}"><input type="number" min="0" value="${a.pt}" data-c="pt" data-id="${a.id}">exp${delBtn('delAch',a.id)}${clSel(a)}</div>`).join('');
+    h+=`<p class="mut">「${esc(c.name)}」のprogress。stageは上から下へ、易しい順に並べます(追加するとexpの低い順に自動で入ります)。「ロール」を押したstageから、そのロールが始まります。</p>
+    <div class="row"><input id="ng" placeholder="progress"><button class="pri" data-a="addProg">progressを追加</button></div>`;
+    h+=P(c.id).map(progEd).join('')||'<p class="mut">progressがまだありません。</p>';
   }else{
     const p=S.players.find(x=>x.id===ap);
-    h+=`<p class="mut">① MCIDを追加 → ② 下の一覧からMCIDを選ぶ → ③ 獲得したprogressにチェック(expが加算されます)</p>
+    h+=`<p class="mut">① MCIDを追加 → ② 一覧からMCIDを選ぶ → ③ progressを選び、進捗(stage)を設定。条件に合うロールは自動で付きます。</p>
     <div class="row"><input id="np" placeholder="MCID"><button class="pri" data-a="addPl">追加</button></div>
     <div class="seg">${[...S.players].sort((x,y)=>x.name.localeCompare(y.name)).map(x=>`<button data-a="selPl" data-id="${x.id}" class="${x.id===ap?'on':''}">${esc(x.name)}</button>`).join('')||'<span class="mut">MCIDがまだいません</span>'}</div>`;
     if(p){
+      p.pr=p.pr||{};
       h+=`<div class="item"><div class="hd"><input value="${esc(p.name)}" data-c="rename" data-id="${p.id}">${delBtn('delPl',p.id)}</div>`;
-      h+=S.cats.map(k=>`<b style="display:block;margin-top:8px">${esc(k.name)}</b><div class="chk">${achs(k.id).map(a=>`<label><input type="checkbox" data-c="own" data-id="${a.id}" data-p="${p.id}" ${p.g.includes(a.id)?'checked':''}>${pn(a,1)}<small>${a.pt}exp</small></label>`).join('')||'<span class="mut">progressが未登録です</span>'}</div>`).join('')+'</div>';
+      const opts=S.cats.map(k=>{const L=P(k.id).filter(g=>!(g.id in p.pr));return L.length?`<optgroup label="${esc(k.name)}">${L.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('')}</optgroup>`:''}).join('');
+      h+=opts?`<div class="row"><select id="addpg" data-c="addpg"><option value="">progressを追加…</option>${opts}</select></div>`:'<p class="mut">追加できるprogressはありません。</p>';
+      h+=S.cats.map(k=>{const L=P(k.id).filter(g=>g.id in p.pr);return L.length?`<b style="display:block;margin-top:8px">${esc(k.name)}</b>`+L.map(g=>prRow(p,g)).join(''):''}).join('')+'</div>';
     }else if(S.players.length)h+='<p class="mut">MCIDを選択してください。</p>';
   }
   return h+'</section>';
@@ -137,14 +208,19 @@ function render(){
   $('#app').innerHTML=h;
 }
 const A={
-  view(id){view=id;menu=false},menu(){menu=!menu},selPl(id){ap=id},sortAch(){const ix=[];S.achs.forEach((a,i)=>{if(a.c===cat)ix.push(i)});const l=ix.map(i=>S.achs[i]).sort((x,y)=>y.pt-x.pt);ix.forEach((i,k)=>{S.achs[i]=l[k]});dirty=true},prof(id){pid=id;view='profile'},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
+  togg(id){og[id]=!og[id]},
+  addRole(id){const g=gp(id),n=v('rn_'+id),at=v('rs_'+id);if(!g||!at)return;if(!n){msg='ロール名を入力してください。';return}g.roles.push({id:uid(),at,n});dirty=true},
+  delRole(id){if(arm(id))return;S.progs.forEach(g=>{g.roles=g.roles.filter(r=>r.id!==id)});dirty=true},
+  addProg(){const n=v('ng');if(!n||!cat)return;if(S.progs.some(g=>g.c===cat&&g.name.toLowerCase()===n.toLowerCase())){msg='同じ名前のprogressがあります。';return}const id=uid();S.progs.push({id,c:cat,name:n,col:{},st:[],roles:[]});og[id]=true;dirty=true},
+  delProg(id){if(arm(id))return;S.progs=S.progs.filter(g=>g.id!==id);S.players.forEach(p=>{if(p.pr)delete p.pr[id]});dirty=true},
+  addSt(id){const g=gp(id),n=v('sn_'+id),e=Math.max(0,+v('se_'+id)||0);if(!g||!n)return;const s={id:uid(),n,e},i=g.st.findIndex(x=>x.e>e);i<0?g.st.push(s):g.st.splice(i,0,s);dirty=true},
+  mvSt(id,el){const f=fs(id);if(!f)return;const j=f.i+ +el.dataset.d;if(j<0||j>=f.g.st.length)return;[f.g.st[f.i],f.g.st[j]]=[f.g.st[j],f.g.st[f.i]];dirty=true},
+  delSt(id){if(arm(id))return;const f=fs(id);if(!f)return;const prev=f.g.st[f.i-1];f.g.st.splice(f.i,1);const nx=f.g.st[f.i]||prev;f.g.roles=f.g.roles.filter(r=>{if(r.at!==id)return true;if(!nx)return false;r.at=nx.id;return true});S.players.forEach(p=>{if(p.pr&&p.pr[f.g.id]===id){if(prev)p.pr[f.g.id]=prev.id;else delete p.pr[f.g.id]}});dirty=true},
+  rmPr(id,el){const p=S.players.find(x=>x.id===el.dataset.p);if(p&&p.pr)delete p.pr[id];dirty=true},
+  view(id){view=id;menu=false},menu(){menu=!menu},selPl(id){ap=id},prof(id){pid=id;view='profile'},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
   addCat(){const n=v('nc');if(n){const id=uid();S.cats.push({id,name:n});cat=id;dirty=true}},
-  addAch(){const n=v('na');if(n&&cat){const pt=Math.max(0,+v('nt')||0),o={id:uid(),c:cat,name:n,lv:v('nl'),pt},nx=achs(cat).find(a=>a.pt<pt);nx?S.achs.splice(S.achs.indexOf(nx),0,o):S.achs.push(o);dirty=true}},
-  addPl(){const n=v('np');if(!n)return;if(!okId(n))return void(msg=ERR);if(dup(n))return void(msg='同じMCIDは追加できません。');const q={id:uid(),name:n,g:[]};S.players.push(q);ap=q.id;dirty=true},
-  mv(id,el){const l=achs(cat),i=l.findIndex(a=>a.id===id),j=i+ +el.dataset.d;if(j<0||j>=l.length)return;
-    const gi=S.achs.indexOf(l[i]),gj=S.achs.indexOf(l[j]);[S.achs[gi],S.achs[gj]]=[S.achs[gj],S.achs[gi]];dirty=true},
-  delCat(id){if(arm(id))return;S.cats=S.cats.filter(c=>c.id!==id);S.achs=S.achs.filter(a=>a.c!==id);dirty=true},
-  delAch(id){if(arm(id))return;S.achs=S.achs.filter(a=>a.id!==id);S.players.forEach(p=>p.g=p.g.filter(g=>g!==id));dirty=true},
+  addPl(){const n=v('np');if(!n)return;if(!okId(n))return void(msg=ERR);if(dup(n))return void(msg='同じMCIDは追加できません。');const q={id:uid(),name:n,pr:{}};S.players.push(q);ap=q.id;dirty=true},
+  delCat(id){if(arm(id))return;S.cats=S.cats.filter(c=>c.id!==id);{const ids=S.progs.filter(g=>g.c===id).map(g=>g.id);S.progs=S.progs.filter(g=>g.c!==id);S.players.forEach(p=>ids.forEach(i=>{if(p.pr)delete p.pr[i]}))}dirty=true},
   delPl(id){if(arm(id))return;if(ap===id)ap='';S.players=S.players.filter(p=>p.id!==id);dirty=true},
   pub(){
     const a=document.createElement('a');
@@ -155,15 +231,21 @@ const A={
   }
 };
 const C={
-  ct(id,el){const a=S.achs.find(a=>a.id===id);a.col={...(a.col||{}),t:el.value};dirty=true},
-  c1(id,el){const a=S.achs.find(a=>a.id===id);a.col={...(a.col||{}),c1:el.value};dirty=true},
-  c2(id,el){const a=S.achs.find(a=>a.id===id);a.col={...(a.col||{}),c2:el.value};dirty=true},
+  rct(id,el){const r=fr(id);if(r){r.col={...(r.col||{}),t:el.value};dirty=true}},
+  rc1(id,el){const r=fr(id);if(r){r.col={...(r.col||{}),c1:el.value};dirty=true}},
+  rc2(id,el){const r=fr(id);if(r){r.col={...(r.col||{}),c2:el.value};dirty=true}},
+  rname(id,el){const r=fr(id);if(r){r.n=el.value.trim();dirty=true}},
+  rat(id,el){const r=fr(id);if(r){r.at=el.value;dirty=true}},
+  stn(id,el){const f=fs(id);if(f){f.s.n=el.value.trim();dirty=true}},
+  ste(id,el){const f=fs(id);if(f){f.s.e=Math.max(0,+el.value||0);dirty=true}},
+  pgn(id,el){const g=gp(id),n=el.value.trim();if(!g||!n)return;if(S.progs.some(x=>x!==g&&x.c===g.c&&x.name.toLowerCase()===n.toLowerCase())){msg='同じ名前のprogressがあります。';return}g.name=n;dirty=true},
+  ct(id,el){const g=gp(id);g.col={...(g.col||{}),t:el.value};dirty=true},
+  c1(id,el){const g=gp(id);g.col={...(g.col||{}),c1:el.value};dirty=true},
+  c2(id,el){const g=gp(id);g.col={...(g.col||{}),c2:el.value};dirty=true},
+  setst(id,el){const p=S.players.find(x=>x.id===el.dataset.p);if(p){(p.pr=p.pr||{})[id]=el.value;dirty=true}},
+  addpg(_,el){const p=S.players.find(x=>x.id===ap);if(p&&el.value){(p.pr=p.pr||{})[el.value]='';dirty=true}},
   pick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());pid=p?p.id:''},
-  lv(id,el){S.achs.find(a=>a.id===id).lv=el.value.trim();dirty=true},
   rename(id,el){const n=el.value.trim();if(!n)return;if(!okId(n)){msg=ERR;return}if(dup(n,id)){msg='同じMCIDがいるため変更できません。';return}S.players.find(p=>p.id===id).name=n;dirty=true},
-  pt(id,el){S.achs.find(a=>a.id===id).pt=Math.max(0,+el.value||0);dirty=true},
-  own(id,el){const p=S.players.find(p=>p.id===el.dataset.p);
-    p.g=el.checked?[...new Set([...p.g,id])]:p.g.filter(x=>x!==id);dirty=true},
   title(_,el){S.title=el.value.trim()||S.title;dirty=true}
 };
 $('#app').addEventListener('click',e=>{
@@ -175,7 +257,7 @@ $('#app').addEventListener('change',e=>{
   const el=e.target.closest('[data-c]');if(!el)return;
   msg='';C[el.dataset.c](el.dataset.id,el);render();
 });
-if(admin)try{const d=localStorage.getItem('lb-draft');if(d){Object.assign(S,JSON.parse(d));dirty=true}}catch(e){}
+if(admin)try{const d=localStorage.getItem('lb-draft');if(d){{const dd=JSON.parse(d);mig(dd);Object.assign(S,dd);dirty=true}}}catch(e){}
 render();
 </script>
 </body></html>
