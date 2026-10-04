@@ -33,13 +33,17 @@ tr:last-child td{border-bottom:0}
 .chk{display:flex;flex-direction:column;gap:4px;margin-top:4px}.chk label{display:flex;align-items:center;gap:6px}
 .ai{flex-wrap:wrap;display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid var(--line)}
 .ai span{flex:1}.ai input{width:70px}.ai input.lv{width:100px}
-.card.tb{max-width:680px}.nw{white-space:nowrap}.dd{position:absolute;right:0;top:100%;z-index:5;display:flex;flex-direction:column;gap:4px;padding:8px;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.18)}.dd button{text-align:left}.pn{font-weight:700;font-size:1.1em}.lk{cursor:pointer;text-decoration:underline dotted}
+.card.tb{max-width:680px}.lb-list{display:flex;flex-direction:column;gap:2px}.lb-row{display:flex;align-items:center;min-height:28px;line-height:1.35}.lb-rank{width:34px;flex:0 0 34px;text-align:right;margin-right:6px;font-variant-numeric:tabular-nums;font-weight:700}.lb-flag{display:inline-block;width:28px;flex:0 0 28px;text-align:center;font-size:1em;margin-right:4px}.lb-name{min-width:0;overflow-wrap:anywhere}.nw{white-space:nowrap}.dd{position:absolute;right:0;top:100%;z-index:5;display:flex;flex-direction:column;gap:4px;padding:8px;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.18)}.dd button{text-align:left}.pn{font-weight:700;font-size:1.1em}.lk{cursor:pointer;text-decoration:underline dotted}
 .pb{display:inline-block;padding:1px 8px;border-radius:6px;line-height:1.45}
+.gradwave-text,.gradwave-bg{background-size:200% 100%;background-position:0% 50%;animation:gradwave 4.8s ease-in-out infinite alternate;will-change:background-position}
+@keyframes gradwave{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+@media (prefers-reduced-motion:reduce){.gradwave-text,.gradwave-bg{animation:none}}
 .gr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:5px 0;border-top:1px solid var(--line)}.gl{display:flex;align-items:center;gap:6px}
 .gr select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
 .rb{font-weight:700;color:var(--mut)}
 .item.pg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
 .pgh{display:flex;align-items:center;gap:10px;cursor:pointer;padding:2px 0}.pgh .ar{margin-left:auto;color:var(--mut)}
+.map-title{text-align:center;font-size:20px;font-weight:800;margin:4px 0 14px}.map-card{overflow:hidden}.map-table{width:100%;border-collapse:separate;border-spacing:0}.map-table td{vertical-align:middle;padding:9px 8px;border-bottom:1px solid var(--line)}.map-table tr:last-child td{border-bottom:0} .map-table tr.map-empty-stage td{border-bottom:0}.map-area{font-weight:700;min-width:170px}.map-area.zero{font-style:italic;font-weight:300;opacity:.76}.map-role td{padding:11px 8px;text-align:center;border-top:2px solid var(--line);border-bottom:2px solid var(--line)}.map-role.no-line td{padding:10px 8px;border-top:2px solid var(--line)!important;border-bottom:2px solid var(--line)!important}.map-role-name{font-weight:800;text-align:center;display:block}.map-transition td{padding:12px 8px;color:var(--mut);font-weight:700;text-align:center;border-top:2px solid var(--line);border-bottom:2px solid var(--line)}.map-players{text-align:center;font-weight:250;white-space:normal}.map-stage-players{font-weight:200}.map-victor-players{text-align:left;font-weight:900;font-size:1.08em;line-height:1.75;white-space:normal}.map-victor-head td{padding:8px;text-align:center;border-top:2px solid var(--line);border-bottom:2px solid var(--line)}.map-victor-release td{padding:8px;text-align:center;border-bottom:1px solid var(--line);font-weight:800;text-decoration:underline}.map-victor-player{font-weight:900}.map-flag{font-size:1.05em;margin-left:4px}.profile-country{font-size:.9em;font-weight:500;color:var(--mut);margin-left:6px;white-space:nowrap}.country-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.country-row select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}.date-entry{width:130px;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;box-sizing:border-box}.date-entry::placeholder{color:var(--mut);opacity:.85}.map-empty{color:var(--mut);font-weight:400}.map-clear{font-size:11px;color:var(--mut);margin-left:3px}.fails-entry{width:72px}.gr label{display:flex;align-items:center;gap:4px}
 .sec{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.sh{font-weight:700;font-size:13px;color:var(--mut);margin-bottom:4px}
 div.rb{flex-wrap:wrap}.rbt{display:flex;align-items:center;gap:6px}.rbc{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.rb .cl{justify-content:center}
 .rb input{width:130px}.rb select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
@@ -56,12 +60,24 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 <script>
 const S=window.DATA||{title:'leaderboard',cats:[],progs:[],players:[]};
 mig(S);
-let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
+let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
 const v=id=>document.getElementById(id).value.trim();
-const okId=n=>/^[A-Za-z0-9]+$/.test(n),ERR='MCIDは半角の英字と数字のみ使用できます。';
+const okId=n=>/^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/.test(n),ERR='MCIDは半角の英字・数字と半角スペースのみ使用できます。';
+const COUNTRIES=[['','未設定'],['JP','🇯🇵 日本'],['KR','🇰🇷 韓国'],['US','🇺🇸 アメリカ'],['CA','🇨🇦 カナダ'],['GB','🇬🇧 イギリス'],['FR','🇫🇷 フランス'],['DE','🇩🇪 ドイツ'],['IT','🇮🇹 イタリア'],['ES','🇪🇸 スペイン'],['PT','🇵🇹 ポルトガル'],['NL','🇳🇱 オランダ'],['BE','🇧🇪 ベルギー'],['CH','🇨🇭 スイス'],['AT','🇦🇹 オーストリア'],['PL','🇵🇱 ポーランド'],['CZ','🇨🇿 チェコ'],['SK','🇸🇰 スロバキア'],['HU','🇭🇺 ハンガリー'],['RO','🇷🇴 ルーマニア'],['RS','🇷🇸 セルビア'],['HR','🇭🇷 クロアチア'],['SE','🇸🇪 スウェーデン'],['NO','🇳🇴 ノルウェー'],['DK','🇩🇰 デンマーク'],['FI','🇫🇮 フィンランド'],['AU','🇦🇺 オーストラリア'],['NZ','🇳🇿 ニュージーランド'],['CN','🇨🇳 中国'],['TW','🇹🇼 台湾'],['HK','🇭🇰 香港'],['SG','🇸🇬 シンガポール'],['MY','🇲🇾 マレーシア'],['TH','🇹🇭 タイ'],['VN','🇻🇳 ベトナム'],['PH','🇵🇭 フィリピン'],['ID','🇮🇩 インドネシア'],['IN','🇮🇳 インド'],['KZ','🇰🇿 カザフスタン'],['TR','🇹🇷 トルコ'],['IL','🇮🇱 イスラエル'],['BR','🇧🇷 ブラジル'],['MX','🇲🇽 メキシコ'],['AR','🇦🇷 アルゼンチン'],['CL','🇨🇱 チリ'],['CO','🇨🇴 コロンビア'],['ZA','🇿🇦 南アフリカ'],['AE','🇦🇪 アラブ首長国連邦']];
+const flag=code=>{code=String(code||'').toUpperCase();return /^[A-Z]{2}$/.test(code)?String.fromCodePoint(...[...code].map(c=>127397+c.charCodeAt(0))):''};
+const countryOpts=code=>COUNTRIES.map(([v,n])=>`<option value="${v}"${v===code?' selected':''}>${n}</option>`).join('');
+const releaseLabel=d=>{if(!d)return '';const x=new Date(d+'T00:00:00');return isNaN(x)?'':x.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});};
+const dateLabel=d=>{if(!d)return '';const x=new Date(d+'T00:00:00');return isNaN(x)?'':x.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});};
+const dateInputValue=d=>{if(!d)return '';const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[1]}/${m[2]}/${m[3]}`:String(d);};
+const normalizeDateInput=v=>{const x=String(v||'').trim().replace(/[.\-]/g,'/');let m=x.match(/^(\d{4})\/?(\d{1,2})\/?(\d{1,2})$/);if(!m){m=x.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)m=[m[0],m[3],m[1],m[2]];}if(!m)return '';const y=+m[1],mo=+m[2],d=+m[3],dt=new Date(y,mo-1,d);return y>=1900&&dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===d?`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`:'';};
+const isVictorProgress=(g,sid)=>{const s=g&&g.st.find(x=>x.id===sid);const r=s&&g.roles.find(x=>x.at===sid);return !!(s&&(/^victor$/i.test(s.n||'')||/^victor$/i.test(r&&r.n||'')));};
+const isRankupProgress=g=>{const c=S.cats.find(x=>x.id===g?.c);return !!(c&&/rankup/i.test(c.name||''));};
+const rankupFailLabel=g=>String(g&&g.rankupFailLabel||'sky').trim()||'sky';
+const victorFails=(p,g)=>{const raw=p&&p.fails&&p.fails[g.id];if(raw===undefined||raw===null||raw==='')return null;const n=Number(raw);return Number.isFinite(n)&&n>=0?Math.floor(n):null};
+const failText=(p,g)=>{const n=victorFails(p,g);if(n===null)return '';const label=esc(rankupFailLabel(g));return ` - ${n} ${label} ${n===1?'fail':'fails'}`;};
 const dup=(n,id)=>S.players.some(p=>p.id!==id&&p.name.toLowerCase()===n.toLowerCase());
 const arm=id=>{if(armed!==id){armed=id;return true}armed='';return false};
 const delBtn=(a,id)=>`<button class="del" data-a="${a}" data-id="${id}">${armed===id?'本当に削除':'削除'}</button>`;
@@ -80,12 +96,12 @@ function pn(a,lv){const k=a.col||{};let st='',bgc='';
   const base=pdark()?[27,33,43]:[255,255,255];
   const sp=k.t==='s'?[hx(k.c1||'#e5484d')]:k.t==='g'?[hx(k.c1||'#e5484d'),hx(k.c2||'#3b82f6')]:k.t==='r'?RBC.map(hx):null;
   if(sp){
-    const fx=sp.map(c=>fixc(c,base)),tint=c=>`rgba(${c.join(',')},.16)`,wv=cs=>`repeating-linear-gradient(90deg,${cs[0]} 0em,${cs[1]} 3em,${cs[0]} 6em)`,gd=cs=>k.t==='g'?wv(cs):`linear-gradient(90deg,${cs.join(',')})`;
-    st=sp.length===1?`color:${rgb(fx[0])}`:clip(gd(fx.map(rgb)));
-    bgc=sp.length===1?tint(sp[0]):gd(sp.map(tint));
+    const fx=sp.map(c=>fixc(c,base)),tint=c=>`rgba(${c.join(',')},.16)`;
+    st=sp.length===1?`color:${rgb(fx[0])}`:clip(`linear-gradient(90deg,${rgb(fx[0])} 0%,${rgb(fx[1])} 50%,${rgb(fx[0])} 100%)`);
+    bgc=sp.length===1?tint(sp[0]):`linear-gradient(90deg,${tint(sp[0])} 0%,${tint(sp[1])} 50%,${tint(sp[0])} 100%)`;
   }
-  const t=`<span class="pn" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
-  return sp?`<span class="pb" style="background:${bgc}">${t}</span>`:t}
+  const t=`<span class="pn${sp&&sp.length>1?' gradwave-text':''}" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
+  return sp?`<span class="pb${sp.length>1?' gradwave-bg':''}" style="background:${bgc}">${t}</span>`:t}
 const gp=id=>S.progs.find(x=>x.id===id);
 const gtop=g=>g.st.length?Math.max(...g.st.map(s=>s.e)):0;
 const P=cid=>S.progs.filter(g=>g.c===cid).sort((a,b)=>gtop(b)-gtop(a));
@@ -95,15 +111,17 @@ const fr=id=>{for(const g of S.progs){const r=g.roles.find(x=>x.id===id);if(r)re
 function normR(S){S.progs.forEach(g=>{g.roles=(g.roles||[]).map(r=>typeof r==='string'?{id:'r'+r,at:r,n:((g.st.find(s=>s.id===r)||{}).n)||g.name}:r)})}
 function roleOf(g,sid){const i=g.st.findIndex(s=>s.id===sid);if(i<0)return null;let r=null,bi=-1;g.roles.forEach(x=>{const k=g.st.findIndex(s=>s.id===x.at);if(k>=0&&k<=i&&k>=bi){r=x;bi=k}});return r}
 function mig(S){
-  if(S.progs){normR(S);return}
+  (S.players||[]).forEach(p=>{p.pr=p.pr||{};p.clear=p.clear||{};p.fails=p.fails||{};if(p.country===undefined)p.country=""});
+  S.settings=S.settings||{};
+  if(S.progs){normR(S);const legacy=String(S.settings.rankupFailLabel||'').trim();S.progs.forEach(g=>{if(/rankup/i.test((S.cats.find(c=>c.id===g.c)||{}).name||'')&&!String(g.rankupFailLabel||'').trim())g.rankupFailLabel=legacy||'sky'});delete S.settings.rankupFailLabel;return}
   S.progs=[];const m={};
   (S.achs||[]).forEach(a=>{const k=a.c+'|'+String(a.name).trim().toLowerCase();(m[k]=m[k]||[]).push(a)});
   Object.values(m).forEach(L=>{
     const vic=a=>/^victor$/i.test(a.lv||''),mid=a=>a.mid!==undefined?!!a.mid:(!vic(a)&&L.some(vic));
     const st=[...L].sort((x,y)=>x.pt-y.pt),f=L.find(a=>a.col&&a.col.t)||L[0];
-    S.progs.push({id:'g'+L[0].id,c:L[0].c,name:String(L[0].name).trim(),col:f.col||{},st:st.map(a=>({id:a.id,n:a.lv||'',e:a.pt})),roles:st.filter(a=>!mid(a)).map(a=>a.id)});
+    S.progs.push({id:'g'+L[0].id,c:L[0].c,name:String(L[0].name).trim(),col:f.col||{},st:st.map(a=>({id:a.id,n:a.lv||'',e:a.pt})),roles:st.filter(a=>!mid(a)).map(a=>a.id),rankupFailLabel:/rankup/i.test((S.cats.find(c=>c.id===L[0].c)||{}).name||'')?'sky':undefined});
   });
-  (S.players||[]).forEach(p=>{const g=p.g||[];p.pr={};
+  (S.players||[]).forEach(p=>{const g=p.g||[];p.pr={};p.clear=p.clear||{};
     S.progs.forEach(pg=>{const own=pg.st.filter(s=>g.includes(s.id));if(own.length)p.pr[pg.id]=own.reduce((a,b)=>b.e>a.e?b:a).id});
     delete p.g});
   delete S.achs;
@@ -127,9 +145,45 @@ function table(c){
   const pages=Math.ceil(r.length/PS);page=Math.min(page,pages-1);
   const pager=pages>1?`<div class="seg" style="justify-content:center;align-items:center"><button data-a="pg" data-id="-1" ${page===0?'disabled':''}>← 前へ</button><span class="mut">${page+1} / ${pages}</span><button data-a="pg" data-id="1" ${page>=pages-1?'disabled':''}>次へ →</button></div>`:'';
   let n=0;
-  const rows=r.map((x,i)=>{if(i===0||cm(r[i-1],x)!==0)n=i+1;
-    return i<page*PS||i>=(page+1)*PS?'':`<tr><td class="rk r${n}">${n}</td><td><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></td>${mode==='pt'?`<td class="num">${x.pt}</td>`:`<td class="nw" style="text-align:right">${x.got[0]?pn({name:x.got[0].g.name,col:rcol(x.got[0].g,x.got[0].r),lv:x.got[0].r.n},1):'-'}</td>`}</tr>`}).join('');
-  return `<div class="card tb"><table><colgroup><col style="width:40px"><col><col></colgroup><thead><tr><th></th><th>MCID</th>${mode==='pt'?'<th style="text-align:right">exp</th>':'<th style="text-align:right">progress</th>'}</tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
+  const rows=r.map((x,i)=>{
+    if(i===0||cm(r[i-1],x)!==0)n=i+1;
+    if(i<page*PS||i>=(page+1)*PS)return '';
+    const fl=flag(x.p.country);
+    return `<div class="lb-row"><span class="lb-rank">${n}.</span><span class="lb-flag">${fl}</span><span class="lb-name"><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></span></div>`;
+  }).join('');
+  return `<div class="card tb"><div class="lb-list">${rows}</div></div>${pager}`;
+}
+function progressMap(){
+  const all=[];S.cats.forEach(c=>P(c.id).forEach(g=>all.push({c,g})));
+  if(!all.length)return '<p class="mut">progressがまだありません。</p>';
+  const picked=all.find(x=>x.g.id===mapid)||all[0];
+  mapid=picked.g.id;
+  const g=picked.g;
+  const players=S.players.filter(p=>p.pr&&p.pr[g.id]);
+  const options=S.cats.map(c=>{const gs=P(c.id);return gs.length?`<optgroup label="${esc(c.name)}">${gs.map(x=>`<option value="${x.id}"${x.id===g.id?' selected':''}>${esc(x.name)}</option>`).join('')}</optgroup>`:''}).join('');
+  const firstPositive=g.st.findIndex(s=>s.e>0);
+  const clearDate=p=>p.clear&&p.clear[g.id]||'';
+  const playerCmp=(a,b)=>{const da=clearDate(a),db=clearDate(b);if(da&&db&&da!==db)return da.localeCompare(db);if(da&&!db)return -1;if(!da&&db)return 1;return a.name.localeCompare(b.name)};
+  const playerText=list=>list.length?`<span class="map-stage-players">${list.map(p=>esc(p.name)).join(', ')}</span>`:'<span class="map-empty">—</span>';
+  const rows=g.st.filter(s=>!/^victor$/i.test(s.n||'')).map((s,idx)=>{
+    const here=players.filter(p=>p.pr[g.id]===s.id).sort((a,b)=>a.name.localeCompare(b.name));
+    const role=g.roles.find(r=>r.at===s.id);
+    const title=s.e===0?esc(s.n||'—'):`(${s.e}exp) ${esc(s.n||'—')}`;
+    const roleRow=role?`<tr class="map-role${s.e===0?' no-line':''}"><td colspan="2"><span class="map-role-name">${pn({name:`${g.name} | ${role.n||'ロール'}`,col:rcol(g,role)})}</span></td></tr>`:'';
+    const transition=(firstPositive===idx&&firstPositive>0)?`<tr class="map-transition"><td colspan="2">${esc(g.name)} Progress for player ${esc(s.n||'—')}+</td></tr>`:'';
+    // exp 0 has no players. Positive stages show players as plain text, with the colon after the section name.
+    const line=s.e===0?`<div class="map-area zero">${title}</div>`:`<div class="map-area">${title}: ${here.length?playerText(here):''}</div>`;
+    return transition+roleRow+`<tr class="${s.e!==0&&!here.length?'map-empty-stage':''}"><td colspan="2">${line}</td></tr>`;
+  }).join('');
+  const victorRole=g.roles.find(r=>{const s=g.st.find(x=>x.id===r.at);return s&&/^victor$/i.test(s.n||'')});
+  const victorPlayers=players.filter(p=>{const sid=p.pr[g.id],s=sid&&g.st.find(x=>x.id===sid);return s&&/^victor$/i.test(s.n||'')}).sort(playerCmp);
+  const victorName=victorRole.n||'VICTOR';
+  const victorTitle=`${g.name} | ${victorName}`;
+  const victorText=victorPlayers.length?victorPlayers.map((p,i)=>`${i+1}. <span class="map-victor-player">${esc(p.name)}</span>${clearDate(p)?` (${esc(dateLabel(clearDate(p)))})`:''} ${flag(p.country)}${isRankupProgress(g)?failText(p,g):''}`).join('<br>'):'<span class="map-empty">—</span>';
+  const rel=releaseLabel(g.release);
+  const releaseRow=rel?`<tr class="map-victor-release"><td colspan="2">📅 Released on ${esc(rel)} 📅</td></tr>`:'';
+  const victorBlock=victorRole?`<tr class="map-victor-head"><td colspan="2"><span class="map-role-name">${pn({name:victorTitle,col:rcol(g,victorRole)})}</span></td></tr>${releaseRow}<tr><td colspan="2" class="map-victor-players">${victorText}</td></tr>`:'';
+  return `<div class="row"><select data-c="mapPg" id="mapPg"><option value="">progressを選択</option>${options}</select></div><div class="map-card card"><div class="map-title">${esc(g.name)}</div><table class="map-table"><tbody>${rows}${victorBlock||(!rows?'<tr><td class="map-empty">stageがありません。</td></tr>':'')}</tbody></table></div>`;
 }
 function lvTable(c){
   const rows=[];
@@ -148,9 +202,11 @@ function profile(){
     const rows=P(c.id).map(g=>{const sid=p.pr&&p.pr[g.id],s=sid&&g.st.find(x=>x.id===sid);return s?{g,s,r:roleOf(g,sid)}:null}).filter(Boolean);
     if(!rows.length)return '';
     tl.push([c.name,rows.reduce((a,x)=>a+x.s.e,0)]);
-    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${x.r?pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1):pn(x.g)}${/^victor$/i.test(x.s.n||'')?'':`<small>セクション: ${esc(x.s.n||'—')}</small>`}</td><td class="num">${x.s.e}</td></tr>`).join('')}</tbody></table></div>`}).join('');
+    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${x.r?pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1):pn(x.g)}${/^victor$/i.test(x.s.n||'')?'':`<small>section: ${esc(x.s.n||'—')}</small>`}</td><td class="num">${x.s.e}</td></tr>`).join('')}</tbody></table></div>`}).join('');
   const tot=tl.length?`<div class="card tb"><table><thead><tr><th>total exp</th><th class="num" style="color:var(--fg);font-size:inherit">${tl.reduce((s,x)=>s+x[1],0)}</th></tr></thead><tbody>${tl.map(x=>`<tr><td>${esc(x[0])}</td><td class="num">${x[1]}</td></tr>`).join('')}</tbody></table></div>`:'';
-  return h+`<h2>${esc(p.name)}</h2>`+(secs?secs+tot:'<p class="mut">獲得したprogressはまだありません。</p>');
+  const country=COUNTRIES.find(x=>x[0]===String(p.country||''));
+  const countryText=country&&country[0]?` <span class="profile-country">${flag(p.country)} ${esc(country[1].replace(/^\S+\s+/,''))}</span>`:'';
+  return h+`<h2>${esc(p.name)}${countryText}</h2>`+(secs?secs+tot:'<p class="mut">獲得したprogressはまだありません。</p>');
 }
 function clSel(o,p){p=p||'';const k=o.col||{},t=k.t||'';
   return `<div class="cl"><select data-c="${p}ct" data-id="${o.id}">${[['','色なし'],['s','単色'],['g','グラデーション'],['r','薄い虹色']].map(([v,l])=>`<option value="${v}"${t===v?' selected':''}>${l}</option>`).join('')}</select>${t==='s'||t==='g'?`<input type="color" data-c="${p}c1" data-id="${o.id}" value="${k.c1||'#e5484d'}">`:''}${t==='g'?`<input type="color" data-c="${p}c2" data-id="${o.id}" value="${k.c2||'#3b82f6'}">`:''}</div>`}
@@ -163,18 +219,23 @@ function progEd(g){
     `<div class="ai"><button data-a="mvSt" data-id="${s.id}" data-d="-1">↑</button><button data-a="mvSt" data-id="${s.id}" data-d="1">↓</button><input class="lv" value="${esc(s.n)}" placeholder="stage" data-c="stn" data-id="${s.id}"><input type="number" min="0" value="${s.e}" data-c="ste" data-id="${s.id}">exp${delBtn('delSt',s.id)}</div>`).join('');
   const rf=n?`<div class="row" style="margin-top:6px"><input id="rn_${g.id}" placeholder="ロール名 例: VICTOR"><select id="rs_${g.id}">${so('')}</select><button class="pri" data-a="addRole" data-id="${g.id}">ロールを作成</button></div>`:'<p class="mut">先にstageを追加してください。</p>';
   return `<div class="item pg">${head}
-    <div class="sec"><div class="sh">基本</div><div class="hd"><input value="${esc(g.name)}" data-c="pgn" data-id="${g.id}">${delBtn('delProg',g.id)}</div><div class="mut" style="margin-top:4px">表示色(progress全体)</div>${clSel(g)}</div>
+    <div class="sec"><div class="sh">基本</div><div class="hd"><input value="${esc(g.name)}" data-c="pgn" data-id="${g.id}">${delBtn('delProg',g.id)}</div><div class="mut" style="margin-top:4px">表示色(progress全体)</div>${clSel(g)}<div class="country-row"><label>VICTOR公開日 <input class="date-entry" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" value="${esc(dateInputValue(g.release||''))}" data-c="release" data-id="${g.id}"></label><small>例: 2025/01/27（VICTOR欄に表示）</small></div>${isRankupProgress(g)?`<div class="country-row"><label>VICTOR fails表記 <input value="${esc(rankupFailLabel(g))}" placeholder="sky" data-c="rankupFailLabel" data-id="${g.id}"></label><small>このProgress Mapだけに適用されます。例: sky → 4 sky fails / 1 sky fail</small></div>`:''}</div>
     <div class="sec"><div class="sh">全体の流れ(上から下へ、易しい順)</div>${rows||'<p class="mut">stageを追加してください。</p>'}<div class="row" style="margin-top:6px"><input id="sn_${g.id}" placeholder="stage 例: s1"><input id="se_${g.id}" type="number" min="0" placeholder="exp" style="width:80px"><button class="pri" data-a="addSt" data-id="${g.id}">stageを追加</button></div></div>
     <div class="sec"><div class="sh">ロール</div><p class="mut">VICTORのようなロールを、名前を付けて作成します。ロールは、選んだstageから次のロールの手前まで続きます(帯が位置を表します)。途中経過のロールも含め、帯の中で色を変えられます(未設定ならprogressの色)。</p>${rf}</div></div>`}
 function prRow(p,g){
-  const sid=p.pr[g.id],r=sid?roleOf(g,sid):null;
-  return `<div class="gr"><span class="gl">${pn(g)}</span><select data-c="setst" data-p="${p.id}" data-id="${g.id}"><option value="">— 未着手</option>${g.st.map(s=>`<option value="${s.id}"${sid===s.id?' selected':''}>${esc(s.n||'—')} - ${s.e} exp</option>`).join('')}</select><small>${r?'ロール: '+esc(r.n||g.name):'ロールなし'}</small><button class="del" data-a="rmPr" data-p="${p.id}" data-id="${g.id}">外す</button></div>`}
+  const sid=p.pr[g.id],r=sid?roleOf(g,sid):null,cd=p.clear&&p.clear[g.id]||'',isVic=isVictorProgress(g,sid),isRankup=isRankupProgress(g),fails=victorFails(p,g);
+  const failField=isRankup&&isVic?`<label class="mut">fails <input class="fails-entry" type="number" min="0" step="1" inputmode="numeric" placeholder="0" value="${fails===null?'':fails}" data-c="fails" data-p="${p.id}" data-id="${g.id}"></label>`:'';
+  return `<div class="gr"><span class="gl">${pn(g)}</span><select data-c="setst" data-p="${p.id}" data-id="${g.id}"><option value="">— 未着手</option>${g.st.map(s=>`<option value="${s.id}"${sid===s.id?' selected':''}>${esc(s.n||'—')} - ${s.e} exp</option>`).join('')}</select>${isVic?`<label class="mut">クリア日 <input class="date-entry" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" value="${esc(dateInputValue(cd))}" data-c="clearDate" data-p="${p.id}" data-id="${g.id}"></label>`:''}${failField}<small>${r?'ロール: '+esc(r.n||g.name):'ロールなし'}</small><button class="del" data-a="rmPr" data-p="${p.id}" data-id="${g.id}">外す</button></div>`
+}
 function adminPanel(c){
-  const T=[['pl','MCID'],['ac','progress'],['ct','分野・設定']];
+  const T=[['pl','MCID'],['ac','progress'],['ct','分野・設定'],['gh','公開設定']];
   let h=`<section class="card"><h2>管理者メニュー</h2>${msg?`<p id="msg">${esc(msg)}</p>`:''}<div class="seg">${T.map(([k,l])=>`<button data-a="tab" data-id="${k}" class="${tab===k?'on':''}">${l}</button>`).join('')}</div>`;
   if(tab==='ct'){
     h+=`<div class="row"><input id="nc" placeholder="新しい分野"><button class="pri" data-a="addCat">分野を追加</button></div>`;
     h+=S.cats.map(x=>`<div class="ai"><span>${esc(x.name)}</span>${delBtn('delCat',x.id)}</div>`).join('');
+  }else if(tab==='gh'){
+    const gh=ghForm();
+    h+=`<div class="sec"><div class="sh">GitHub 公開設定</div><p class="mut">「公開サイトに反映」で使用するGitHubの設定です。入力内容はこのブラウザのローカル保存領域に保存されます。ここはProgress Mapごとの設定とは別の、公開先全体の設定です。</p><div class="row"><label class="mut">owner <input id="ghO" value="${esc(gh.o||'')}" placeholder="GitHubユーザー名"></label><label class="mut">repo <input id="ghR" value="${esc(gh.r||'')}" placeholder="リポジトリ名"></label></div><div class="row"><label class="mut">branch <input id="ghB" value="${esc(gh.b||'main')}" placeholder="main"></label><label class="mut">data.js <input id="ghP" value="${esc(gh.p||'data.js')}" placeholder="data.js"></label></div><div class="row"><label class="mut" style="flex:1">token <input id="ghT" type="password" value="${esc(gh.t||'')}" placeholder="GitHub token" style="width:100%"></label></div><div class="row"><button class="pri" data-a="ghSave">公開設定を保存</button><button data-a="ghTest">接続テスト</button><button data-a="ghLoad">GitHubから読み込み</button><button class="del" data-a="ghClear">設定を削除</button></div></div>`;
   }else if(!c){h+='<p class="mut">先に「分野・設定」で分野を追加してください。</p>'}
   else if(tab==='ac'){
     h+=`<p class="mut">「${esc(c.name)}」のprogress。stageは上から下へ、易しい順に並べます(追加するとexpの低い順に自動で入ります)。「ロール」を押したstageから、そのロールが始まります。</p>
@@ -184,10 +245,11 @@ function adminPanel(c){
     const p=S.players.find(x=>x.id===ap);
     h+=`<p class="mut">① MCIDを追加 → ② 一覧からMCIDを選ぶ → ③ progressを選び、進捗(stage)を設定。条件に合うロールは自動で付きます。</p>
     <div class="row"><input id="np" placeholder="MCID"><button class="pri" data-a="addPl">追加</button></div>
-    <div class="seg">${[...S.players].sort((x,y)=>x.name.localeCompare(y.name)).map(x=>`<button data-a="selPl" data-id="${x.id}" class="${x.id===ap?'on':''}">${esc(x.name)}</button>`).join('')||'<span class="mut">MCIDがまだいません</span>'}</div>`;
+    <div class="row"><input id="aq" list="apl" placeholder="MCIDを検索・選択" value="${p?esc(p.name):''}" data-c="apick"><datalist id="apl">${[...S.players].sort((x,y)=>x.name.localeCompare(y.name)).map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></div>`;
     if(p){
       p.pr=p.pr||{};
       h+=`<div class="item"><div class="hd"><input value="${esc(p.name)}" data-c="rename" data-id="${p.id}">${delBtn('delPl',p.id)}</div>`;
+      h+=`<div class="country-row"><label>国籍 <select data-c="country" data-id="${p.id}">${countryOpts(p.country||'')}</select></label><small>VICTORのプレイヤー欄に国旗として表示されます。</small></div>`;
       const opts=S.cats.map(k=>{const L=P(k.id).filter(g=>!(g.id in p.pr));return L.length?`<optgroup label="${esc(k.name)}">${L.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('')}</optgroup>`:''}).join('');
       h+=opts?`<div class="row"><select id="addpg" data-c="addpg"><option value="">progressを追加…</option>${opts}</select></div>`:'<p class="mut">追加できるprogressはありません。</p>';
       h+=S.cats.map(k=>{const L=P(k.id).filter(g=>g.id in p.pr);return L.length?`<b style="display:block;margin-top:8px">${esc(k.name)}</b>`+L.map(g=>prRow(p,g)).join(''):''}).join('')+'</div>';
@@ -198,10 +260,11 @@ function adminPanel(c){
 function render(){
   if(admin&&dirty)try{localStorage.setItem('lb-draft',JSON.stringify(S))}catch(e){}
   const c=S.cats.find(x=>x.id===cat)||S.cats[0];cat=c&&c.id;
-  let h=`<header style="justify-content:flex-end;position:relative"><div class="seg" style="margin:0;justify-content:flex-end">${dirty?'<button class="pri" data-a="pub" id="pub">data.jsを書き出す</button>':''}${admin?`<button data-a="view" data-id="admin" class="${view==='admin'?'on':''}">管理者メニュー</button>`:''}<button data-a="menu" aria-label="menu" class="${menu?'on':''}">☰</button></div>${menu?`<div class="dd">${[['board','leaderboard'],['list','prog role list'],['profile','profile']].map(([k,l])=>`<button data-a="view" data-id="${k}" class="${view===k?'on':''}">${l}</button>`).join('')}</div>`:''}</header>`;
+  let h=`<header style="justify-content:flex-end;position:relative"><div class="seg" style="margin:0;justify-content:flex-end">${dirty?'<button class="pri" data-a="pub" id="pub">data.jsを書き出す</button>':''}${admin?`<button data-a="view" data-id="admin" class="${view==='admin'?'on':''}">管理者メニュー</button>`:''}<button data-a="menu" aria-label="menu" class="${menu?'on':''}">☰</button></div>${menu?`<div class="dd">${[['board','leaderboard'],['list','prog role list'],['profile','profile'],['map','progress map']].map(([k,l])=>`<button data-a="view" data-id="${k}" class="${view===k?'on':''}">${l}</button>`).join('')}</div>`:''}</header>`;
   if(view!=='profile')h+=`<nav>${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')}</nav>`;
   if(view==='admin'&&admin)h+=adminPanel(c);
   else if(view==='profile')h+=profile();
+  else if(view==='map')h+=progressMap();
   else if(!c)h+='<p class="mut">分野がまだありません。</p>';
   else if(view==='list')h+=lvTable(c);
   else h+=`<div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">exp</button><button data-a="mode" data-id="ac" class="${mode==='ac'?'on':''}">highest role</button></div>`+table(c);
@@ -212,15 +275,15 @@ const A={
   addRole(id){const g=gp(id),n=v('rn_'+id),at=v('rs_'+id);if(!g||!at)return;if(!n){msg='ロール名を入力してください。';return}g.roles.push({id:uid(),at,n});dirty=true},
   delRole(id){if(arm(id))return;S.progs.forEach(g=>{g.roles=g.roles.filter(r=>r.id!==id)});dirty=true},
   addProg(){const n=v('ng');if(!n||!cat)return;if(S.progs.some(g=>g.c===cat&&g.name.toLowerCase()===n.toLowerCase())){msg='同じ名前のprogressがあります。';return}const id=uid();S.progs.push({id,c:cat,name:n,col:{},st:[],roles:[]});og[id]=true;dirty=true},
-  delProg(id){if(arm(id))return;S.progs=S.progs.filter(g=>g.id!==id);S.players.forEach(p=>{if(p.pr)delete p.pr[id]});dirty=true},
+  delProg(id){if(arm(id))return;S.progs=S.progs.filter(g=>g.id!==id);S.players.forEach(p=>{if(p.pr)delete p.pr[id];if(p.clear)delete p.clear[id]});dirty=true},
   addSt(id){const g=gp(id),n=v('sn_'+id),e=Math.max(0,+v('se_'+id)||0);if(!g||!n)return;const s={id:uid(),n,e},i=g.st.findIndex(x=>x.e>e);i<0?g.st.push(s):g.st.splice(i,0,s);dirty=true},
   mvSt(id,el){const f=fs(id);if(!f)return;const j=f.i+ +el.dataset.d;if(j<0||j>=f.g.st.length)return;[f.g.st[f.i],f.g.st[j]]=[f.g.st[j],f.g.st[f.i]];dirty=true},
-  delSt(id){if(arm(id))return;const f=fs(id);if(!f)return;const prev=f.g.st[f.i-1];f.g.st.splice(f.i,1);const nx=f.g.st[f.i]||prev;f.g.roles=f.g.roles.filter(r=>{if(r.at!==id)return true;if(!nx)return false;r.at=nx.id;return true});S.players.forEach(p=>{if(p.pr&&p.pr[f.g.id]===id){if(prev)p.pr[f.g.id]=prev.id;else delete p.pr[f.g.id]}});dirty=true},
-  rmPr(id,el){const p=S.players.find(x=>x.id===el.dataset.p);if(p&&p.pr)delete p.pr[id];dirty=true},
-  view(id){view=id;menu=false},menu(){menu=!menu},selPl(id){ap=id},prof(id){pid=id;view='profile'},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
+  delSt(id){if(arm(id))return;const f=fs(id);if(!f)return;const prev=f.g.st[f.i-1];f.g.st.splice(f.i,1);const nx=f.g.st[f.i]||prev;f.g.roles=f.g.roles.filter(r=>{if(r.at!==id)return true;if(!nx)return false;r.at=nx.id;return true});S.players.forEach(p=>{if(p.pr&&p.pr[f.g.id]===id){if(prev)p.pr[f.g.id]=prev.id;else delete p.pr[f.g.id];if(p.clear)delete p.clear[f.g.id]}});dirty=true},
+  rmPr(id,el){const p=S.players.find(x=>x.id===el.dataset.p);if(p&&p.pr){delete p.pr[id];if(p.clear)delete p.clear[id]}dirty=true},
+  view(id){view=id;menu=false;if(id==='map'&&!mapid){const first=S.cats.flatMap(c=>P(c.id));if(first[0])mapid=first[0].id}},menu(){menu=!menu},selPl(id){ap=id},apick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());ap=p?p.id:''},prof(id){pid=id;view='profile'},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
   addCat(){const n=v('nc');if(n){const id=uid();S.cats.push({id,name:n});cat=id;dirty=true}},
-  addPl(){const n=v('np');if(!n)return;if(!okId(n))return void(msg=ERR);if(dup(n))return void(msg='同じMCIDは追加できません。');const q={id:uid(),name:n,pr:{}};S.players.push(q);ap=q.id;dirty=true},
-  delCat(id){if(arm(id))return;S.cats=S.cats.filter(c=>c.id!==id);{const ids=S.progs.filter(g=>g.c===id).map(g=>g.id);S.progs=S.progs.filter(g=>g.c!==id);S.players.forEach(p=>ids.forEach(i=>{if(p.pr)delete p.pr[i]}))}dirty=true},
+  addPl(){const n=v('np');if(!n)return;if(!okId(n))return void(msg=ERR);if(dup(n))return void(msg='同じMCIDは追加できません。');const q={id:uid(),name:n,pr:{},clear:{},fails:{},country:''};S.players.push(q);ap=q.id;dirty=true},
+  delCat(id){if(arm(id))return;S.cats=S.cats.filter(c=>c.id!==id);{const ids=S.progs.filter(g=>g.c===id).map(g=>g.id);S.progs=S.progs.filter(g=>g.c!==id);S.players.forEach(p=>ids.forEach(i=>{if(p.pr)delete p.pr[i];if(p.clear)delete p.clear[i]}))}dirty=true},
   delPl(id){if(arm(id))return;if(ap===id)ap='';S.players=S.players.filter(p=>p.id!==id);dirty=true},
   pub(){
     const a=document.createElement('a');
@@ -242,11 +305,17 @@ const C={
   ct(id,el){const g=gp(id);g.col={...(g.col||{}),t:el.value};dirty=true},
   c1(id,el){const g=gp(id);g.col={...(g.col||{}),c1:el.value};dirty=true},
   c2(id,el){const g=gp(id);g.col={...(g.col||{}),c2:el.value};dirty=true},
-  setst(id,el){const p=S.players.find(x=>x.id===el.dataset.p);if(p){(p.pr=p.pr||{})[id]=el.value;dirty=true}},
+  country(id,el){const p=S.players.find(x=>x.id===id);if(p){p.country=el.value;dirty=true}},
+  release(id,el){const g=gp(id),v=normalizeDateInput(el.value);if(g){if(el.value.trim()&&!v){msg='日付は YYYY/MM/DD 形式で入力してください。';return}g.release=v;dirty=true}},
+  fails(id,el){const p=S.players.find(x=>x.id===el.dataset.p),g=gp(id);if(!p||!g||!isRankupProgress(g)||!isVictorProgress(g,p.pr&&p.pr[g.id]))return;p.fails=p.fails||{};const n=String(el.value||'').trim();if(!n){delete p.fails[id]}else{const v=Math.floor(Number(n));if(Number.isFinite(v)&&v>=0)p.fails[id]=v}dirty=true},
+  rankupFailLabel(id,el){const g=gp(id);if(g&&isRankupProgress(g)){g.rankupFailLabel=el.value.trim()||'sky';dirty=true}},
+  setst(id,el){const p=S.players.find(x=>x.id===el.dataset.p),g=gp(id);if(p){p.pr=p.pr||{};if(el.value)p.pr[id]=el.value;else delete p.pr[id];if(!el.value||!isVictorProgress(g,el.value)){if(p.clear)delete p.clear[id]}dirty=true}},
+  clearDate(id,el){const p=S.players.find(x=>x.id===el.dataset.p),v=normalizeDateInput(el.value);if(p){if(el.value.trim()&&!v){msg='日付は YYYY/MM/DD 形式で入力してください。';return}p.clear=p.clear||{};if(v)p.clear[id]=v;else delete p.clear[id];dirty=true}},
   addpg(_,el){const p=S.players.find(x=>x.id===ap);if(p&&el.value){(p.pr=p.pr||{})[el.value]='';dirty=true}},
   pick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());pid=p?p.id:''},
   rename(id,el){const n=el.value.trim();if(!n)return;if(!okId(n)){msg=ERR;return}if(dup(n,id)){msg='同じMCIDがいるため変更できません。';return}S.players.find(p=>p.id===id).name=n;dirty=true},
-  title(_,el){S.title=el.value.trim()||S.title;dirty=true}
+  title(_,el){S.title=el.value.trim()||S.title;dirty=true},
+  mapPg(_,el){mapid=el.value}
 };
 $('#app').addEventListener('click',e=>{
   const el=e.target.closest('[data-a]');if(!el)return;
