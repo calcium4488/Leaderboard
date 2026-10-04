@@ -114,13 +114,19 @@ const pdark=()=>{try{const t=document.documentElement.getAttribute('data-theme')
 const bl=(c,a,b)=>c.map((v,i)=>Math.round(b[i]*(1-a)+v*a));
 const rgb=c=>`rgb(${c.join(',')})`;
 function fixc(c,base){const dk=base[0]<128,bg=bl(c,.16,base);for(let k=0;k<=1;k+=.1){const x=mx(c,dk?255:0,k);if(cr(x,bg)>=3)return x}return mx(c,dk?255:0,1)}
+function autoBg(c){
+  // Keep the configured text color EXACTLY as-is. The background remains
+  // clearly visible by tinting the current card color with the configured color.
+  // This preserves the site's light/dark theme instead of washing the background out.
+  const color = rgb(c);
+  return `color-mix(in srgb, ${color} 20%, var(--card))`;
+}
 function pn(a,lv){const k=a.col||{};let st='',bgc='';
-  const base=pdark()?[27,33,43]:[255,255,255];
   const sp=k.t==='s'?[hx(k.c1||'#e5484d')]:k.t==='g'?[hx(k.c1||'#e5484d'),hx(k.c2||'#3b82f6')]:k.t==='r'?RBC.map(hx):null;
   if(sp){
-    const fx=sp.map(c=>fixc(c,base)),tint=c=>`rgba(${c.join(',')},.16)`;
-    st=sp.length===1?`color:${rgb(fx[0])}`:clip(`linear-gradient(90deg,${rgb(fx[0])} 0%,${rgb(fx[1])} 50%,${rgb(fx[0])} 100%)`);
-    bgc=sp.length===1?tint(sp[0]):`linear-gradient(90deg,${tint(sp[0])} 0%,${tint(sp[1])} 50%,${tint(sp[0])} 100%)`;
+    // Text uses the configured color exactly. Only the background is auto-adjusted for readability.
+    st=sp.length===1?`color:${rgb(sp[0])}`:clip(`linear-gradient(90deg,${rgb(sp[0])} 0%,${rgb(sp[1])} 50%,${rgb(sp[0])} 100%)`);
+    bgc=sp.length===1?autoBg(sp[0]):`linear-gradient(90deg,${autoBg(sp[0])} 0%,${autoBg(sp[1])} 50%,${autoBg(sp[0])} 100%)`;
   }
   const t=`<span class="pn${sp&&sp.length>1?' gradwave-text':''}" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
   return sp?`<span class="pb${sp.length>1?' gradwave-bg':''}" style="background:${bgc}">${t}</span>`:t}
