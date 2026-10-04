@@ -80,9 +80,9 @@ function pn(a,lv){const k=a.col||{};let st='',bgc='';
   const base=pdark()?[27,33,43]:[255,255,255];
   const sp=k.t==='s'?[hx(k.c1||'#e5484d')]:k.t==='g'?[hx(k.c1||'#e5484d'),hx(k.c2||'#3b82f6')]:k.t==='r'?RBC.map(hx):null;
   if(sp){
-    const fx=sp.map(c=>fixc(c,base)),tint=c=>`rgba(${c.join(',')},.16)`;
-    st=sp.length===1?`color:${rgb(fx[0])}`:clip(`linear-gradient(90deg,${fx.map(rgb).join(',')})`);
-    bgc=sp.length===1?tint(sp[0]):`linear-gradient(90deg,${sp.map(tint).join(',')})`;
+    const fx=sp.map(c=>fixc(c,base)),tint=c=>`rgba(${c.join(',')},.16)`,wv=cs=>`repeating-linear-gradient(90deg,${cs[0]} 0em,${cs[1]} 3em,${cs[0]} 6em)`,gd=cs=>k.t==='g'?wv(cs):`linear-gradient(90deg,${cs.join(',')})`;
+    st=sp.length===1?`color:${rgb(fx[0])}`:clip(gd(fx.map(rgb)));
+    bgc=sp.length===1?tint(sp[0]):gd(sp.map(tint));
   }
   const t=`<span class="pn" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
   return sp?`<span class="pb" style="background:${bgc}">${t}</span>`:t}
