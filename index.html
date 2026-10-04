@@ -129,7 +129,7 @@ function table(c){
   let n=0;
   const rows=r.map((x,i)=>{if(i===0||cm(r[i-1],x)!==0)n=i+1;
     return i<page*PS||i>=(page+1)*PS?'':`<tr><td class="rk r${n}">${n}</td><td><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></td>${mode==='pt'?`<td class="num">${x.pt}</td>`:`<td class="nw" style="text-align:right">${x.got[0]?pn({name:x.got[0].g.name,col:rcol(x.got[0].g,x.got[0].r),lv:x.got[0].r.n},1):'-'}</td>`}</tr>`}).join('');
-  return `<div class="card tb"><table><colgroup><col style="width:40px"><col><col></colgroup><thead><tr><th></th><th>MCID</th>${mode==='pt'?'<th style="text-align:right">point</th>':'<th style="text-align:right">progress</th>'}</tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
+  return `<div class="card tb"><table><colgroup><col style="width:40px"><col><col></colgroup><thead><tr><th></th><th>MCID</th>${mode==='pt'?'<th style="text-align:right">exp</th>':'<th style="text-align:right">progress</th>'}</tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
 }
 function lvTable(c){
   const rows=[];
@@ -204,7 +204,7 @@ function render(){
   else if(view==='profile')h+=profile();
   else if(!c)h+='<p class="mut">分野がまだありません。</p>';
   else if(view==='list')h+=lvTable(c);
-  else h+=`<div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">point</button><button data-a="mode" data-id="ac" class="${mode==='ac'?'on':''}">highest role</button></div>`+table(c);
+  else h+=`<div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">exp</button><button data-a="mode" data-id="ac" class="${mode==='ac'?'on':''}">highest role</button></div>`+table(c);
   $('#app').innerHTML=h;
 }
 const A={
