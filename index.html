@@ -104,7 +104,7 @@ const dup=(n,id)=>S.players.some(p=>p.id!==id&&p.name.toLowerCase()===n.toLowerC
 const arm=id=>{if(armed!==id){armed=id;return true}armed='';return false};
 const delBtn=(a,id)=>`<button class="del" data-a="${a}" data-id="${id}">${armed===id?'本当に削除':'削除'}</button>`;
 
-const RBC=['#ffa8b8','#ffc999','#f0e08a','#a9e3b0','#9fd8f3','#c0b2f0'],RB='linear-gradient(90deg,'+RBC.join(',')+')';
+const RBC=['#d8c7f4','#c9dcfa','#c7edf3','#d5f0cf','#fff0bf','#ffd9c5','#f6c9dc','#dcccf3'],RB='linear-gradient(90deg,'+RBC.join(',')+')';
 const clip=g=>`background:${g};-webkit-background-clip:text;background-clip:text;color:transparent`;
 const hx=h=>{const m=/^#([0-9a-f]{6})$/i.exec(h||'');if(!m)return[128,128,128];const n=parseInt(m[1],16);return[n>>16&255,n>>8&255,n&255]};
 const rl=c=>{const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)};return .2126*f(c[0])+.7152*f(c[1])+.0722*f(c[2])};
@@ -124,9 +124,16 @@ function autoBg(c){
 function pn(a,lv){const k=a.col||{};let st='',bgc='';
   const sp=k.t==='s'?[hx(k.c1||'#e5484d')]:k.t==='g'?[hx(k.c1||'#e5484d'),hx(k.c2||'#3b82f6')]:k.t==='r'?RBC.map(hx):null;
   if(sp){
-    // Text uses the configured color exactly. Only the background is auto-adjusted for readability.
-    st=sp.length===1?`color:${rgb(sp[0])}`:clip(`linear-gradient(90deg,${rgb(sp[0])} 0%,${rgb(sp[1])} 50%,${rgb(sp[0])} 100%)`);
-    bgc=sp.length===1?autoBg(sp[0]):`linear-gradient(90deg,${autoBg(sp[0])} 0%,${autoBg(sp[1])} 50%,${autoBg(sp[0])} 100%)`;
+    // 「薄い虹色」は文字も背景も、淡い虹色の連続グラデーションにする。
+    // 背景は通常の色設定と同じようにカード上で視認できる濃さにする。
+    if(k.t==='r'){
+      st=clip(RB);
+      const rbg=RBC.map(hx).map(autoBg);
+      bgc=`linear-gradient(90deg,${rbg.join(',')})`;
+    }else{
+      st=sp.length===1?`color:${rgb(sp[0])}`:clip(`linear-gradient(90deg,${rgb(sp[0])} 0%,${rgb(sp[1])} 50%,${rgb(sp[0])} 100%)`);
+      bgc=sp.length===1?autoBg(sp[0]):`linear-gradient(90deg,${autoBg(sp[0])} 0%,${autoBg(sp[1])} 50%,${autoBg(sp[0])} 100%)`;
+    }
   }
   const t=`<span class="pn${sp&&sp.length>1?' gradwave-text':''}" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
   return sp?`<span class="pb${sp.length>1?' gradwave-bg':''}" style="background:${bgc}">${t}</span>`:t}
