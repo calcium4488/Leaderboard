@@ -33,17 +33,21 @@ tr:last-child td{border-bottom:0}
 .chk{display:flex;flex-direction:column;gap:4px;margin-top:4px}.chk label{display:flex;align-items:center;gap:6px}
 .ai{flex-wrap:wrap;display:flex;align-items:center;gap:6px;padding:4px 0;border-top:1px solid var(--line)}
 .ai span{flex:1}.ai input{width:70px}.ai input.lv{width:100px}
-.card.tb{max-width:680px}.lb-list{display:flex;flex-direction:column;gap:2px}.lb-row{display:flex;align-items:center;min-height:28px;line-height:1.35}.lb-rank{width:34px;flex:0 0 34px;text-align:right;margin-right:6px;font-variant-numeric:tabular-nums;font-weight:700}.lb-flag{display:inline-block;width:28px;flex:0 0 28px;text-align:center;font-size:1em;margin-right:4px}.lb-name{min-width:0;overflow-wrap:anywhere}.nw{white-space:nowrap}.dd{position:absolute;right:0;top:100%;z-index:5;display:flex;flex-direction:column;gap:4px;padding:8px;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.18)}.dd button{text-align:left}.pn{font-weight:700;font-size:1.1em}.lk{cursor:pointer;text-decoration:underline dotted}
+.card.tb{max-width:680px} .lb-controls{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0}.lb-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.lb-label{font-weight:700;white-space:nowrap}.lb-list{display:flex;flex-direction:column;gap:2px}.lb-row{display:flex;align-items:center;min-height:28px;line-height:1.35}.lb-rank{width:34px;flex:0 0 34px;text-align:right;margin-right:6px;font-variant-numeric:tabular-nums;font-weight:700}.lb-flag{display:inline-block;width:28px;flex:0 0 28px;text-align:center;font-size:1em;margin-right:4px}.lb-name{min-width:0;overflow-wrap:anywhere}.nw{white-space:nowrap}.dd{position:absolute;right:0;top:100%;z-index:5;display:flex;flex-direction:column;gap:4px;padding:8px;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.18)}.dd button{text-align:left}.pn{font-weight:700;font-size:1.1em}.lk{cursor:pointer;text-decoration:underline dotted}
 .pb{display:inline-block;padding:1px 8px;border-radius:6px;line-height:1.45}
 .gradwave-text,.gradwave-bg{background-size:200% 100%;background-position:0% 50%;animation:gradwave 4.8s ease-in-out infinite alternate;will-change:background-position}
 @keyframes gradwave{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 @media (prefers-reduced-motion:reduce){.gradwave-text,.gradwave-bg{animation:none}}
 .gr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:5px 0;border-top:1px solid var(--line)}.gl{display:flex;align-items:center;gap:6px}
 .gr select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
+.pager-arrow{font-size:22px;line-height:1;min-width:42px;min-height:38px;padding:4px 10px;font-weight:800}
+#mapPg{font-size:17px;min-height:44px;min-width:280px;padding:9px 14px;border-radius:10px}
+#mapPg optgroup,#mapPg option{font-size:16px}
+
 .rb{font-weight:700;color:var(--mut)}
 .item.pg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
 .pgh{display:flex;align-items:center;gap:10px;cursor:pointer;padding:2px 0}.pgh .ar{margin-left:auto;color:var(--mut)}
-.map-title{text-align:center;font-size:20px;font-weight:800;margin:4px 0 14px}.map-card{overflow:hidden}.map-table{width:100%;border-collapse:separate;border-spacing:0}.map-table td{vertical-align:middle;padding:9px 8px;border-bottom:1px solid var(--line)}.map-table tr:last-child td{border-bottom:0} .map-table tr.map-empty-stage td{border-bottom:0}.map-area{font-weight:700;min-width:170px}.map-area.zero{font-style:italic;font-weight:300;opacity:.76}.map-role td{padding:11px 8px;text-align:center;border-top:2px solid var(--line);border-bottom:2px solid var(--line)}.map-role.no-line td{padding:10px 8px;border-top:2px solid var(--line)!important;border-bottom:2px solid var(--line)!important}.map-role-name{font-weight:800;text-align:center;display:block}.map-transition td{padding:12px 8px;color:var(--mut);font-weight:700;text-align:center;border-top:2px solid var(--line);border-bottom:2px solid var(--line)}.map-players{text-align:center;font-weight:250;white-space:normal}.map-stage-players{font-weight:200}.map-victor-players{text-align:left;font-weight:900;font-size:1.08em;line-height:1.75;white-space:normal}.map-victor-head td{padding:8px;text-align:center;border-top:2px solid var(--line);border-bottom:2px solid var(--line)}.map-victor-release td{padding:8px;text-align:center;border-bottom:1px solid var(--line);font-weight:800;text-decoration:underline}.map-victor-player{font-weight:900}.map-flag{font-size:1.05em;margin-left:4px}.profile-country{font-size:.9em;font-weight:500;color:var(--mut);margin-left:6px;white-space:nowrap}.country-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.country-row select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}.date-entry{width:130px;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;box-sizing:border-box}.date-entry::placeholder{color:var(--mut);opacity:.85}.map-empty{color:var(--mut);font-weight:400}.map-clear{font-size:11px;color:var(--mut);margin-left:3px}.fails-entry{width:72px}.gr label{display:flex;align-items:center;gap:4px}
+.map-title{text-align:center;font-size:20px;font-weight:800;margin:4px 0 14px}.map-card{overflow:hidden}.map-table{width:100%;border-collapse:separate;border-spacing:0}.map-table td{vertical-align:middle;padding:3px 6px;border:0!important}.map-table tr.map-empty-stage td{border:0!important}.map-area{font-weight:700;min-width:150px;border:0!important;padding-top:2px;padding-bottom:2px}.map-area.zero{font-style:italic;font-weight:300;opacity:.76;min-width:0;width:max-content;max-width:100%;margin-left:0;margin-right:0;border:0!important;padding-top:1px;padding-bottom:1px}.map-role td{padding:7px 6px;text-align:center;border-top:3px solid var(--line)!important;border-bottom:3px solid var(--line)!important}.map-role.no-line td{padding:3px 6px;border:0!important}.map-role-name{font-weight:800;text-align:center;display:block}.map-transition td{padding:7px 6px;color:var(--mut);font-weight:700;text-align:center;border-top:3px solid var(--line)!important;border-bottom:3px solid var(--line)!important}.map-players{text-align:center;font-weight:250;white-space:normal}.map-stage-players{font-weight:200}.map-victor-players{text-align:left;font-weight:900;font-size:1.08em;line-height:1.75;white-space:normal;padding:0!important}.map-victor-head td{padding:7px 6px;text-align:center;border-top:3px solid var(--line)!important;border-bottom:3px solid var(--line)!important}.map-victor-release td{padding:8px;text-align:center;border:0!important;font-weight:800;text-decoration:underline}.map-victor-player{font-weight:900}.map-victor-player-row{padding:7px 8px;border-bottom:2px solid var(--line)}.map-victor-player-row:first-child{border-top:0}.map-victor-player-row:last-child{border-bottom:0}.map-flag{font-size:1.05em;margin-left:4px}.profile-country{font-size:.9em;font-weight:500;color:var(--mut);margin-left:6px;white-space:nowrap}.country-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}.country-row select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}.date-entry{width:130px;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;box-sizing:border-box}.date-entry::placeholder{color:var(--mut);opacity:.85}.map-empty{color:var(--mut);font-weight:400}.map-clear{font-size:11px;color:var(--mut);margin-left:3px}.fails-entry{width:72px}.gr label{display:flex;align-items:center;gap:4px}
 .sec{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.sh{font-weight:700;font-size:13px;color:var(--mut);margin-bottom:4px}
 div.rb{flex-wrap:wrap}.rbt{display:flex;align-items:center;gap:6px}.rbc{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.rb .cl{justify-content:center}
 .rb input{width:130px}.rb select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
@@ -53,6 +57,24 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 .cl input[type=color]{width:36px;height:26px;padding:0;border:0;background:none}
 .cl select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
 #msg{color:var(--dg)}
+.leaderboard-role{white-space:nowrap;}
+
+/* Highest role column: right aligned, single line */
+.leaderboard-role,
+.role-value,
+.highest-role,
+.highest-role-value {
+  text-align: right !important;
+  white-space: nowrap !important;
+}
+
+
+/* Leaderboard alignment */
+.leaderboard-table th:nth-child(2) { text-align:left; padding-left:38px; }
+.leaderboard-table td:nth-child(2) { text-align:left; padding-left:10px; }
+.leaderboard-table th:nth-child(3),
+.leaderboard-table td:nth-child(3) { text-align:right; padding-right:7px; }
+.leaderboard-table .leaderboard-role { text-align:right !important; white-space:nowrap !important; }
 </style></head>
 <body>
 <div id="app"></div>
@@ -60,7 +82,7 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 <script>
 const S=window.DATA||{title:'leaderboard',cats:[],progs:[],players:[]};
 mig(S);
-let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
+let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=Math.max(1,Math.min(500,Number(S.settings.pageSize)||50)),armed='',msg='';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
@@ -113,6 +135,8 @@ function roleOf(g,sid){const i=g.st.findIndex(s=>s.id===sid);if(i<0)return null;
 function mig(S){
   (S.players||[]).forEach(p=>{p.pr=p.pr||{};p.clear=p.clear||{};p.fails=p.fails||{};if(p.country===undefined)p.country=""});
   S.settings=S.settings||{};
+  if(!Number.isFinite(Number(S.settings.pageSize))||Number(S.settings.pageSize)<1)S.settings.pageSize=50;
+  S.settings.pageSize=Math.max(1,Math.min(500,Math.floor(Number(S.settings.pageSize))));
   if(S.progs){normR(S);const legacy=String(S.settings.rankupFailLabel||'').trim();S.progs.forEach(g=>{if(/rankup/i.test((S.cats.find(c=>c.id===g.c)||{}).name||'')&&!String(g.rankupFailLabel||'').trim())g.rankupFailLabel=legacy||'sky'});delete S.settings.rankupFailLabel;return}
   S.progs=[];const m={};
   (S.achs||[]).forEach(a=>{const k=a.c+'|'+String(a.name).trim().toLowerCase();(m[k]=m[k]||[]).push(a)});
@@ -139,19 +163,26 @@ function cmpAch(x,y){
   return y.ix.length-x.ix.length;
 }
 function table(c){
-  const cm=mode==='pt'?(a,b)=>b.pt-a.pt||cmpAch(a,b):(a,b)=>cmpAch(a,b)||b.pt-a.pt;
+  // exp ranking and highest-role ranking are separate views so their ranks never mix.
+  const cm=mode==='pt'
+    ? (a,b)=>b.pt-a.pt||cmpAch(a,b)
+    : (a,b)=>cmpAch(a,b)||b.pt-a.pt;
   const r=rank(c.id).filter(x=>x.pt>0).sort(cm);
   if(!r.length)return '<p class="mut">ランキング対象のMCIDがまだいません。</p>';
   const pages=Math.ceil(r.length/PS);page=Math.min(page,pages-1);
-  const pager=pages>1?`<div class="seg" style="justify-content:center;align-items:center"><button data-a="pg" data-id="-1" ${page===0?'disabled':''}>← 前へ</button><span class="mut">${page+1} / ${pages}</span><button data-a="pg" data-id="1" ${page>=pages-1?'disabled':''}>次へ →</button></div>`:'';
+  const pager=pages>1?`<div class="seg" style="justify-content:center;align-items:center"><button class="pager-arrow" data-a="pg" data-id="-1" aria-label="前のページ" title="前のページ" ${page===0?'disabled':''}>←</button><span class="mut">${page+1} / ${pages}</span><button class="pager-arrow" data-a="pg" data-id="1" aria-label="次のページ" title="次のページ" ${page>=pages-1?'disabled':''}>→</button></div>`:'';
   let n=0;
   const rows=r.map((x,i)=>{
     if(i===0||cm(r[i-1],x)!==0)n=i+1;
     if(i<page*PS||i>=(page+1)*PS)return '';
     const fl=flag(x.p.country);
-    return `<div class="lb-row"><span class="lb-rank">${n}.</span><span class="lb-flag">${fl}</span><span class="lb-name"><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></span></div>`;
+    const value=mode==='pt'
+      ? `<td class="num">${x.pt}</td>`
+      : `<td class="nw leaderboard-role">${x.got[0]?pn({name:`${x.got[0].g.name} | ${x.got[0].r.n||'—'}`,col:rcol(x.got[0].g,x.got[0].r)}):'-'}</td>`;
+    return `<tr><td class="rk r${n}">${n}.</td><td><span class="lb-inline-flag">${fl}</span><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></td>${value}</tr>`;
   }).join('');
-  return `<div class="card tb"><div class="lb-list">${rows}</div></div>${pager}`;
+  const valueHead=mode==='pt'?'exp':'highest role';
+  return `<div class="card tb"><table class="leaderboard-table"><colgroup><col style="width:48px"><col style="min-width:220px"><col style="min-width:${mode==='pt'?'90px':'150px'}"></colgroup><thead><tr><th>順位</th><th>MCID</th><th${mode==='role'?' style="text-align:right; padding-right:7px"':' style="text-align:right; padding-right:7px"'}>${valueHead}</th></tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
 }
 function progressMap(){
   const all=[];S.cats.forEach(c=>P(c.id).forEach(g=>all.push({c,g})));
@@ -179,7 +210,7 @@ function progressMap(){
   const victorPlayers=players.filter(p=>{const sid=p.pr[g.id],s=sid&&g.st.find(x=>x.id===sid);return s&&/^victor$/i.test(s.n||'')}).sort(playerCmp);
   const victorName=victorRole.n||'VICTOR';
   const victorTitle=`${g.name} | ${victorName}`;
-  const victorText=victorPlayers.length?victorPlayers.map((p,i)=>`${i+1}. <span class="map-victor-player">${esc(p.name)}</span>${clearDate(p)?` (${esc(dateLabel(clearDate(p)))})`:''} ${flag(p.country)}${isRankupProgress(g)?failText(p,g):''}`).join('<br>'):'<span class="map-empty">—</span>';
+  const victorText=victorPlayers.length?victorPlayers.map((p,i)=>`<div class="map-victor-player-row">${i+1}. <span class="map-victor-player">${esc(p.name)}</span>${clearDate(p)?` (${esc(dateLabel(clearDate(p)))})`:''} ${flag(p.country)}${isRankupProgress(g)?failText(p,g):''}</div>`).join(''):'<div class="map-victor-player-row"><span class="map-empty">—</span></div>';
   const rel=releaseLabel(g.release);
   const releaseRow=rel?`<tr class="map-victor-release"><td colspan="2">📅 Released on ${esc(rel)} 📅</td></tr>`:'';
   const victorBlock=victorRole?`<tr class="map-victor-head"><td colspan="2"><span class="map-role-name">${pn({name:victorTitle,col:rcol(g,victorRole)})}</span></td></tr>${releaseRow}<tr><td colspan="2" class="map-victor-players">${victorText}</td></tr>`:'';
@@ -261,13 +292,13 @@ function render(){
   if(admin&&dirty)try{localStorage.setItem('lb-draft',JSON.stringify(S))}catch(e){}
   const c=S.cats.find(x=>x.id===cat)||S.cats[0];cat=c&&c.id;
   let h=`<header style="justify-content:flex-end;position:relative"><div class="seg" style="margin:0;justify-content:flex-end">${dirty?'<button class="pri" data-a="pub" id="pub">data.jsを書き出す</button>':''}${admin?`<button data-a="view" data-id="admin" class="${view==='admin'?'on':''}">管理者メニュー</button>`:''}<button data-a="menu" aria-label="menu" class="${menu?'on':''}">☰</button></div>${menu?`<div class="dd">${[['board','leaderboard'],['list','prog role list'],['profile','profile'],['map','progress map']].map(([k,l])=>`<button data-a="view" data-id="${k}" class="${view===k?'on':''}">${l}</button>`).join('')}</div>`:''}</header>`;
-  if(view!=='profile')h+=`<nav>${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')}</nav>`;
+  if(view==='board')h+=`<div class="lb-controls"><div class="lb-group"><div class="lb-label">category</div><div class="seg">${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')||'<span class="mut">分野がありません</span>'}</div></div><div class="lb-group"><div class="lb-label">type</div><div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">exp</button><button data-a="mode" data-id="role" class="${mode==='role'?'on':''}">highest role</button></div></div></div>`;else if(view!=='profile')h+=`<nav>${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')}</nav>`;
   if(view==='admin'&&admin)h+=adminPanel(c);
   else if(view==='profile')h+=profile();
   else if(view==='map')h+=progressMap();
   else if(!c)h+='<p class="mut">分野がまだありません。</p>';
   else if(view==='list')h+=lvTable(c);
-  else h+=`<div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">exp</button><button data-a="mode" data-id="ac" class="${mode==='ac'?'on':''}">highest role</button></div>`+table(c);
+  else h+=table(c);
   $('#app').innerHTML=h;
 }
 const A={
