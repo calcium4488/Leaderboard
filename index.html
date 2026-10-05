@@ -121,7 +121,7 @@ function autoBg(c){
   const color = rgb(c);
   return `color-mix(in srgb, ${color} 20%, var(--card))`;
 }
-function pn(a,lv){const k=a.col||{};let st='',bgc='';
+function pn(a,lv,forceWhite){const k=a.col||{};let st='',bgc='';
   const sp=k.t==='s'?[hx(k.c1||'#e5484d')]:k.t==='g'?[hx(k.c1||'#e5484d'),hx(k.c2||'#3b82f6')]:k.t==='r'?RBC.map(hx):null;
   if(sp){
     // 「薄い虹色」は文字も背景も、淡い虹色の連続グラデーションにする。
@@ -135,6 +135,7 @@ function pn(a,lv){const k=a.col||{};let st='',bgc='';
       bgc=sp.length===1?autoBg(sp[0]):`linear-gradient(90deg,${autoBg(sp[0])} 0%,${autoBg(sp[1])} 50%,${autoBg(sp[0])} 100%)`;
     }
   }
+  if(forceWhite){ st='color:#fff!important'; bgc=''; }
   const t=`<span class="pn${sp&&sp.length>1?' gradwave-text':''}" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
   return sp?`<span class="pb${sp.length>1?' gradwave-bg':''}" style="background:${bgc}">${t}</span>`:t}
 const gp=id=>S.progs.find(x=>x.id===id);
@@ -244,9 +245,11 @@ function profile(){
   const tl=[];
   const secs=S.cats.map(c=>{
     const rows=P(c.id).map(g=>{const sid=p.pr&&p.pr[g.id],s=sid&&g.st.find(x=>x.id===sid);return s?{g,s,r:roleOf(g,sid)}:null}).filter(Boolean);
+    // ロールの有無に関係なく、設定されているEXPの小さい順に並べる
+    rows.sort((a,b)=>b.s.e-a.s.e);
     if(!rows.length)return '';
     tl.push([c.name,rows.reduce((a,x)=>a+x.s.e,0)]);
-    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${x.r?pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1):pn(x.g)}${/^victor$/i.test(x.s.n||'')?'':`<small>section: ${esc(x.s.n||'—')}</small>`}</td><td class="num">${x.s.e}</td></tr>`).join('')}</tbody></table></div>`}).join('');
+    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${x.r?pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1):pn(x.g,undefined,true)}${/^victor$/i.test(x.s.n||'')?'':`<small>section: ${esc(x.s.n||'—')}</small>`}</td><td class="num">${x.s.e}</td></tr>`).join('')}</tbody></table></div>`}).join('');
   const tot=tl.length?`<div class="card tb"><table><thead><tr><th>total exp</th><th class="num" style="color:var(--fg);font-size:inherit">${tl.reduce((s,x)=>s+x[1],0)}</th></tr></thead><tbody>${tl.map(x=>`<tr><td>${esc(x[0])}</td><td class="num">${x[1]}</td></tr>`).join('')}</tbody></table></div>`:'';
   const country=COUNTRIES.find(x=>x[0]===String(p.country||''));
   const countryText=country&&country[0]?` <span class="profile-country">${flag(p.country)} ${esc(country[1].replace(/^\S+\s+/,''))}</span>`:'';
