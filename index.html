@@ -234,7 +234,7 @@ function table(c){
   // exp ranking and highest-role ranking are separate views so their ranks never mix.
   const cm=mode==='pt'
     ? (a,b)=>b.pt-a.pt||cmpAch(a,b)
-    : (a,b)=>(b.got[0]?.e??-1)-(a.got[0]?.e??-1)||a.p.name.localeCompare(b.p.name);
+    : (a,b)=>(b.got[0]?.e??-1)-(a.got[0]?.e??-1);
   const r=rank(c.id).filter(x=>mode==='pt'?x.pt>0:x.got.length>0).sort(cm);
   if(!r.length)return '<p class="mut">ランキング対象のMCIDがまだいません。</p>';
   const pages=Math.ceil(r.length/PS);page=Math.min(page,pages-1);
