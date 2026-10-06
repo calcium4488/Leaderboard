@@ -35,8 +35,7 @@ tr:last-child td{border-bottom:0}
 .ai span{flex:1}.ai input{width:70px}.ai input.lv{width:100px}
 .card.tb{max-width:680px} .lb-controls{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0}.lb-group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.lb-label{font-weight:700;white-space:nowrap}.leaderboard-table th,.leaderboard-table td{padding:8px 7px;vertical-align:middle}.leaderboard-table th{text-align:left}.leaderboard-table th:first-child,.leaderboard-table td:first-child{text-align:right}.leaderboard-table .nw{white-space:nowrap}.lb-inline-flag{display:inline-block;width:24px;flex:0 0 24px;text-align:center;margin-right:4px;font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;font-size:1em;line-height:1}.lb-list{display:flex;flex-direction:column;gap:2px}.lb-row{display:flex;align-items:center;min-height:28px;line-height:1.35}.lb-rank{width:34px;flex:0 0 34px;text-align:right;margin-right:6px;font-variant-numeric:tabular-nums;font-weight:700}.lb-flag{display:inline-block;width:28px;flex:0 0 28px;text-align:center;font-size:1em;margin-right:4px}.lb-name{min-width:0;overflow-wrap:anywhere}.nw{white-space:nowrap}.dd{position:absolute;right:0;top:100%;z-index:5;display:flex;flex-direction:column;gap:4px;padding:8px;min-width:170px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.18)}.dd button{text-align:left}.pn{font-weight:700;font-size:1.1em}.lk{cursor:pointer;text-decoration:underline dotted}
 .pb{display:inline-block;padding:1px 8px;border-radius:6px;line-height:1.45}
-.gradwave-text,.gradwave-bg{background-size:200% 100%;background-position:0% 50%;animation:gradwave 4.8s ease-in-out infinite alternate;will-change:background-position}
-@keyframes gradwave{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.gradwave-text,.gradwave-bg{background-position:0% 50%;background-repeat:repeat-x;background-size:16ch 100%}
 @media (prefers-reduced-motion:reduce){.gradwave-text,.gradwave-bg{animation:none}}
 .gr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:5px 0;border-top:1px solid var(--line)}.gl{display:flex;align-items:center;gap:6px}
 .gr select{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:3px 6px}
@@ -82,7 +81,34 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 <script>
 const S=window.DATA||{title:'leaderboard',cats:[],progs:[],players:[]};
 mig(S);
-let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=Math.max(1,Math.min(500,Number(S.settings.pageSize)||50)),armed='',msg='';
+let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
+
+// 公開ビューを共有 data.js と自動同期
+let lastSharedData='';
+async function syncSharedData(){
+  if(admin||dirty)return;
+  try{
+    const res=await fetch('data.js?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok)return;
+    const text=await res.text();
+    if(!text||text===lastSharedData)return;
+    const m=text.match(/window\.DATA\s*=\s*(\{[\s\S]*\})\s*;?/);
+    if(!m)return;
+    const incoming=JSON.parse(m[1]);
+    mig(incoming);
+    const normalized=JSON.stringify(incoming);
+    if(!lastSharedData){lastSharedData=normalized;return;}
+    if(normalized!==JSON.stringify(S)){
+      Object.keys(S).forEach(k=>delete S[k]);
+      Object.assign(S,incoming);
+      cat=(S.cats[0]&&S.cats[0].id)||cat;
+      page=0;
+      render();
+    }
+    lastSharedData=normalized;
+  }catch(e){}
+}
+
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
@@ -114,30 +140,58 @@ const pdark=()=>{try{const t=document.documentElement.getAttribute('data-theme')
 const bl=(c,a,b)=>c.map((v,i)=>Math.round(b[i]*(1-a)+v*a));
 const rgb=c=>`rgb(${c.join(',')})`;
 function fixc(c,base){const dk=base[0]<128,bg=bl(c,.16,base);for(let k=0;k<=1;k+=.1){const x=mx(c,dk?255:0,k);if(cr(x,bg)>=3)return x}return mx(c,dk?255:0,1)}
-function autoBg(c){
-  // Keep the configured text color EXACTLY as-is. The background remains
-  // clearly visible by tinting the current card color with the configured color.
-  // This preserves the site's light/dark theme instead of washing the background out.
+const GRAD_N=16,GRAD_BG=5;
+function autoBg(c,pct){
+  // Keep the configured text color EXACTLY as-is. Solid-role backgrounds use
+  // a restrained tint so the role color remains visible without dominating.
   const color = rgb(c);
-  return `color-mix(in srgb, ${color} 20%, var(--card))`;
+  return `color-mix(in srgb, ${color} ${pct||14}%, var(--card))`;
 }
-function pn(a,lv,forceWhite){const k=a.col||{};let st='',bgc='';
+function gradColors(text,c1,c2){
+  const n=[...String(text||'')].length;
+  if(!n)return [];
+  // Embed a smooth, repeating c1 -> c2 -> c1 gradient directly into the text.
+  // One complete cycle is exactly 8 characters, so the ends can land anywhere
+  // in the gradient instead of being forced to the same color.
+  const chars=[...String(text)];
+  return chars.map((ch,i)=>{
+    const phase=i/16;
+    const mix=(1-Math.cos(phase*Math.PI*2))/2;
+    return c1.map((v,j)=>Math.round(v*(1-mix)+c2[j]*mix));
+  });
+}
+function gradCss(text,c1,c2){
+  // The text itself is one continuous gradient. One cycle spans exactly 16ch,
+  // so the gradient flows through the glyphs instead of assigning one color per character.
+  return `linear-gradient(90deg,${rgb(c1)} 0%,${rgb(c2)} 50%,${rgb(c1)} 100%)`;
+}
+function pn(a,lv,forceWhite){
+  const k=a.col||{};let st='',bgc='';
   const sp=k.t==='s'?[hx(k.c1||'#e5484d')]:k.t==='g'?[hx(k.c1||'#e5484d'),hx(k.c2||'#3b82f6')]:k.t==='r'?RBC.map(hx):null;
+  const label=String(a.name||'')+(lv&&a.lv&&a.lv!==a.name?' | '+String(a.lv):'');
   if(sp){
-    // 「薄い虹色」は文字も背景も、淡い虹色の連続グラデーションにする。
-    // 背景は通常の色設定と同じようにカード上で視認できる濃さにする。
     if(k.t==='r'){
       st=clip(RB);
-      const rbg=RBC.map(hx).map(autoBg);
+      const rbg=RBC.map(hx).map(c=>autoBg(c));
       bgc=`linear-gradient(90deg,${rbg.join(',')})`;
+    }else if(sp.length===1){
+      st=`color:${rgb(sp[0])}`;
+      bgc=autoBg(sp[0]);
     }else{
-      st=sp.length===1?`color:${rgb(sp[0])}`:clip(`linear-gradient(90deg,${rgb(sp[0])} 0%,${rgb(sp[1])} 50%,${rgb(sp[0])} 100%)`);
-      bgc=sp.length===1?autoBg(sp[0]):`linear-gradient(90deg,${autoBg(sp[0])} 0%,${autoBg(sp[1])} 50%,${autoBg(sp[0])} 100%)`;
+      // Discord-like role gradients: the text is a continuous gradient,
+      // repeating smoothly every 8 characters. The background is intentionally
+      // much softer so it supports the text instead of competing with it.
+      st=clip(gradCss(label,sp[0],sp[1]))+';background-size:16ch 100%;background-repeat:repeat-x';
+      const bg1=autoBg(sp[0],GRAD_BG),bg2=autoBg(sp[1],GRAD_BG);
+      bgc=`linear-gradient(90deg,${bg1} 0%,${bg2} 50%,${bg1} 100%)`;
     }
   }
   if(forceWhite){ st='color:#fff!important'; bgc=''; }
-  const t=`<span class="pn${sp&&sp.length>1?' gradwave-text':''}" style="${st}">${esc(a.name)+(lv&&a.lv&&a.lv!==a.name?' | '+esc(a.lv):'')}</span>`;
-  return sp?`<span class="pb${sp.length>1?' gradwave-bg':''}" style="background:${bgc}">${t}</span>`:t}
+  const textHtml=esc(label);
+  const gd=sp&&sp.length>1&&k.t==='g'&&!forceWhite?` data-g1="${sp[0].join(',')}" data-g2="${sp[1].join(',')}"`:'';
+  const t=`<span class="pn${sp&&sp.length>1?' gradwave-text':''}"${gd} style="${st}">${textHtml}</span>`;
+  return sp?`<span class="pb${sp.length>1?' gradwave-bg':''}" style="background:${bgc}${sp.length>1&&k.t==='g'&&!forceWhite?';background-size:16ch 100%;background-repeat:repeat-x;background-position:8px 50%':''}">${t}</span>`:t
+}
 const gp=id=>S.progs.find(x=>x.id===id);
 const gtop=g=>g.st.length?Math.max(...g.st.map(s=>s.e)):0;
 const P=cid=>S.progs.filter(g=>g.c===cid).sort((a,b)=>gtop(b)-gtop(a));
@@ -150,7 +204,7 @@ function mig(S){
   (S.players||[]).forEach(p=>{p.pr=p.pr||{};p.clear=p.clear||{};p.fails=p.fails||{};if(p.country===undefined)p.country=""});
   S.settings=S.settings||{};
   if(!Number.isFinite(Number(S.settings.pageSize))||Number(S.settings.pageSize)<1)S.settings.pageSize=50;
-  S.settings.pageSize=Math.max(1,Math.min(500,Math.floor(Number(S.settings.pageSize))));
+  S.settings.pageSize=50;
   if(S.progs){normR(S);const legacy=String(S.settings.rankupFailLabel||'').trim();S.progs.forEach(g=>{if(/rankup/i.test((S.cats.find(c=>c.id===g.c)||{}).name||'')&&!String(g.rankupFailLabel||'').trim())g.rankupFailLabel=legacy||'sky'});delete S.settings.rankupFailLabel;return}
   S.progs=[];const m={};
   (S.achs||[]).forEach(a=>{const k=a.c+'|'+String(a.name).trim().toLowerCase();(m[k]=m[k]||[]).push(a)});
@@ -180,8 +234,8 @@ function table(c){
   // exp ranking and highest-role ranking are separate views so their ranks never mix.
   const cm=mode==='pt'
     ? (a,b)=>b.pt-a.pt||cmpAch(a,b)
-    : (a,b)=>cmpAch(a,b)||b.pt-a.pt;
-  const r=rank(c.id).filter(x=>x.pt>0).sort(cm);
+    : (a,b)=>(b.got[0]?.e??-1)-(a.got[0]?.e??-1)||a.p.name.localeCompare(b.p.name);
+  const r=rank(c.id).filter(x=>mode==='pt'?x.pt>0:x.got.length>0).sort(cm);
   if(!r.length)return '<p class="mut">ランキング対象のMCIDがまだいません。</p>';
   const pages=Math.ceil(r.length/PS);page=Math.min(page,pages-1);
   const pager=pages>1?`<div class="seg" style="justify-content:center;align-items:center"><button class="pager-arrow" data-a="pg" data-id="-1" aria-label="前のページ" title="前のページ" ${page===0?'disabled':''}>←</button><span class="mut">${page+1} / ${pages}</span><button class="pager-arrow" data-a="pg" data-id="1" aria-label="次のページ" title="次のページ" ${page>=pages-1?'disabled':''}>→</button></div>`:'';
@@ -249,7 +303,7 @@ function profile(){
     rows.sort((a,b)=>b.s.e-a.s.e);
     if(!rows.length)return '';
     tl.push([c.name,rows.reduce((a,x)=>a+x.s.e,0)]);
-    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${x.r?pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1):pn(x.g,undefined,true)}${/^victor$/i.test(x.s.n||'')?'':`<small>section: ${esc(x.s.n||'—')}</small>`}</td><td class="num">${x.s.e}</td></tr>`).join('')}</tbody></table></div>`}).join('');
+    return `<div class="card tb"><table><thead><tr><th>${esc(c.name)}</th><th style="text-align:right">exp</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="nw">${x.r?pn({name:x.g.name,col:rcol(x.g,x.r),lv:x.r.n},1):pn(x.g,undefined,true)}${/^victor$/i.test(x.s.n||'')?'':`<small>section: ${esc(/rankup/i.test(c.name||'')?String(x.s.n||'—').replace(/\s*\([^)]*\)\s*$/,'').trim():(x.s.n||'—'))}</small>`}</td><td class="num">${x.s.e}</td></tr>`).join('')}</tbody></table></div>`}).join('');
   const tot=tl.length?`<div class="card tb"><table><thead><tr><th>total exp</th><th class="num" style="color:var(--fg);font-size:inherit">${tl.reduce((s,x)=>s+x[1],0)}</th></tr></thead><tbody>${tl.map(x=>`<tr><td>${esc(x[0])}</td><td class="num">${x[1]}</td></tr>`).join('')}</tbody></table></div>`:'';
   const country=COUNTRIES.find(x=>x[0]===String(p.country||''));
   const countryText=country&&country[0]?` <span class="profile-country">${flag(p.country)} ${esc(country[1].replace(/^\S+\s+/,''))}</span>`:'';
@@ -304,6 +358,62 @@ function adminPanel(c){
   }
   return h+'</section>';
 }
+function fitGrad(root){
+  // 1文字目の左端を起点に、16文字ごとに c1→c2→c1 を1周期として配置する。
+  // 最後が16文字に満たない場合は、グラデーションを途中で打ち切る。
+  (root||document).querySelectorAll('.gradwave-text[data-g1]').forEach(el=>{
+    try{
+      const tn=el.firstChild;
+      if(!tn||tn.nodeType!==3)return;
+      const c1=el.dataset.g1.split(',').map(Number),c2=el.dataset.g2.split(',').map(Number);
+      const txt=tn.data,idx=[];
+      let o=0;for(const ch of txt){idx.push(o);o+=ch.length}
+      const n=idx.length;if(!n)return;
+      const base=el.getBoundingClientRect();
+      if(!base.width)return;
+      const rg=document.createRange();
+      const lenAt=i=>(i+1<n?idx[i+1]:txt.length)-idx[i];
+      let top0=null,bad=false;
+      const rect=i=>{rg.setStart(tn,idx[i]);rg.setEnd(tn,idx[i]+lenAt(i));const r=rg.getClientRects()[0];if(!r){bad=true;return null}return r};
+      const left=i=>{const r=rect(i);if(!r)return 0;if(top0===null)top0=r.top;else if(Math.abs(r.top-top0)>3)bad=true;return r.left-base.left};
+      const right=i=>{const r=rect(i);if(!r)return 0;if(top0!==null&&Math.abs(r.top-top0)>3)bad=true;return r.right-base.left};
+      const xs=[];
+      for(let i=0;i<n;i+=GRAD_N)xs.push([i,left(i)]);
+      const xEnd=right(n-1);
+      if(bad)return;
+      const lerp=(a,b,t)=>a.map((v,j)=>Math.round(v*(1-t)+b[j]*t));
+      const stops=[];
+      for(let k=0;k<xs.length;k++){
+        const [i,s]=xs[k];
+        const full=i+GRAD_N<=n;
+        const e=(full&&i+GRAD_N<n)?xs[k+1][1]:xEnd;
+        const f=full?1:(n-i)/GRAD_N;
+        const w=(e-s)/f;
+        stops.push([c1,s]);
+        if(f>0.5)stops.push([c2,s+w/2]);
+        if(full)stops.push([c1,e]);
+        else stops.push([f<=0.5?lerp(c1,c2,f/0.5):lerp(c2,c1,(f-0.5)/0.5),e]);
+      }
+      const px=v=>v.toFixed(2)+'px';
+      el.style.backgroundImage='linear-gradient(90deg,'+stops.map(([c,x])=>rgb(c)+' '+px(x)).join(',')+')';
+      el.style.backgroundSize='100% 100%';
+      el.style.backgroundRepeat='no-repeat';
+      el.style.backgroundPosition='0 0';
+      const pb=el.parentElement;
+      if(pb&&pb.classList.contains('pb')){
+        const pr=pb.getBoundingClientRect();
+        const off=base.left-(pr.left+pb.clientLeft);
+        pb.style.backgroundImage='linear-gradient(90deg,'+stops.map(([c,x])=>autoBg(c,GRAD_BG)+' '+px(x+off)).join(',')+')';
+        pb.style.backgroundSize='100% 100%';
+        pb.style.backgroundRepeat='no-repeat';
+        pb.style.backgroundPosition='0 0';
+      }
+    }catch(e){}
+  });
+}
+let fitRaf=0;
+window.addEventListener('resize',()=>{cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(()=>fitGrad())});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitGrad());
 function render(){
   if(admin&&dirty)try{localStorage.setItem('lb-draft',JSON.stringify(S))}catch(e){}
   const c=S.cats.find(x=>x.id===cat)||S.cats[0];cat=c&&c.id;
@@ -316,7 +426,12 @@ function render(){
   else if(view==='list')h+=lvTable(c);
   else h+=table(c);
   $('#app').innerHTML=h;
+  fitGrad($('#app'));
 }
+
+// 公開ページは5秒ごとに共有データを確認
+setTimeout(()=>{syncSharedData();setInterval(syncSharedData,5000)},1000);
+
 const A={
   togg(id){og[id]=!og[id]},
   addRole(id){const g=gp(id),n=v('rn_'+id),at=v('rs_'+id);if(!g||!at)return;if(!n){msg='ロール名を入力してください。';return}g.roles.push({id:uid(),at,n});dirty=true},
