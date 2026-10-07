@@ -296,8 +296,11 @@ function progressMap(){
   mapid=picked.g.id;
   const g=picked.g;
   const players=S.players.filter(p=>p.pr&&p.pr[g.id]);
-  // Progress Map itself is selected by progress only; category (segment/rankup) is not a selection.
-  const options=all.map(x=>`<option value="${x.g.id}"${x.g.id===g.id?' selected':''}>${esc(x.g.name)}</option>`).join('');
+  // Progress Map choices are grouped by category for easier selection.
+  const mapGroups={segment:[],rankup:[]};
+  all.forEach(x=>{/rankup/i.test((x.c&&x.c.name)||'')?mapGroups.rankup.push(x):mapGroups.segment.push(x)});
+  const mapGroupOptions=(label,list)=>list.length?`<optgroup label="${label}">${list.map(x=>`<option value="${x.g.id}"${x.g.id===g.id?' selected':''}>${esc(x.g.name)}</option>`).join('')}</optgroup>`:'';
+  const options=mapGroupOptions('segment',mapGroups.segment)+mapGroupOptions('rankup',mapGroups.rankup);
   const firstPositive=g.st.findIndex(s=>s.e>0);
   const clearDate=p=>p.clear&&p.clear[g.id]||'';
   const playerCmp=(a,b)=>{const da=clearDate(a),db=clearDate(b);if(da&&db&&da!==db)return da.localeCompare(db);if(da&&!db)return -1;if(!da&&db)return 1;return a.name.localeCompare(b.name)};
