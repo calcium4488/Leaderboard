@@ -255,7 +255,9 @@ function mig(S){
   normR(S);
 }
 function rank(c){
-  const gs=P(c);
+  // total exp is always calculated across every category (segment + rankup),
+  // independently of the currently selected category.
+  const gs=mode==='total'?S.progs:P(c);
   return S.players.map(p=>{let pt=0;const ro=[];
     gs.forEach(g=>{const sid=p.pr&&p.pr[g.id],s=sid&&g.st.find(x=>x.id===sid);if(!s)return;pt+=s.e;const r=roleOf(g,sid);if(r){const rs=g.st.find(x=>x.id===r.at);ro.push({g,r,e:rs?rs.e:0})}});
     ro.sort((a,b)=>b.e-a.e);
@@ -267,10 +269,10 @@ function cmpAch(x,y){
 }
 function table(c){
   // exp ranking and highest-role ranking are separate views so their ranks never mix.
-  const cm=mode==='pt'
+  const cm=mode==='pt'||mode==='total'
     ? (a,b)=>b.pt-a.pt||cmpAch(a,b)
     : (a,b)=>(b.got[0]?.e??-1)-(a.got[0]?.e??-1);
-  const r=rank(c.id).filter(x=>mode==='pt'?x.pt>0:x.got.length>0).sort(cm);
+  const r=rank(c.id).filter(x=>(mode==='pt'||mode==='total')?x.pt>0:x.got.length>0).sort(cm);
   if(!r.length)return '<p class="mut">ランキング対象のMCIDがまだいません。</p>';
   const pages=Math.ceil(r.length/PS);page=Math.min(page,pages-1);
   const pager=pages>1?`<div class="seg" style="justify-content:center;align-items:center"><button class="pager-arrow" data-a="pg" data-id="-1" aria-label="前のページ" title="前のページ" ${page===0?'disabled':''}>←</button><span class="mut">${page+1} / ${pages}</span><button class="pager-arrow" data-a="pg" data-id="1" aria-label="次のページ" title="次のページ" ${page>=pages-1?'disabled':''}>→</button></div>`:'';
@@ -279,13 +281,13 @@ function table(c){
     if(i===0||cm(r[i-1],x)!==0)n=i+1;
     if(i<page*PS||i>=(page+1)*PS)return '';
     const fl=flag(x.p.country);
-    const value=mode==='pt'
+    const value=mode==='pt'||mode==='total'
       ? `<td class="num">${x.pt}</td>`
       : `<td class="nw leaderboard-role">${x.got[0]?pn({name:`${x.got[0].g.name} | ${x.got[0].r.n||'—'}`,col:rcol(x.got[0].g,x.got[0].r)}):'-'}</td>`;
     return `<tr><td class="rk r${n}">${n}.</td><td><span class="lb-inline-flag">${fl}</span><span class="lk" data-a="prof" data-id="${x.p.id}">${esc(x.p.name)}</span></td>${value}</tr>`;
   }).join('');
-  const valueHead=mode==='pt'?'exp':'highest role';
-  return `<div class="card tb"><table class="leaderboard-table"><colgroup><col style="width:48px"><col style="min-width:220px"><col style="min-width:${mode==='pt'?'90px':'150px'}"></colgroup><thead><tr><th>順位</th><th>MCID</th><th${mode==='role'?' style="text-align:right; padding-right:7px"':' style="text-align:right; padding-right:7px"'}>${valueHead}</th></tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
+  const valueHead=mode==='pt'?'exp':mode==='total'?'total exp':'highest role';
+  return `<div class="card tb"><table class="leaderboard-table"><colgroup><col style="width:48px"><col style="min-width:220px"><col style="min-width:${mode==='role'?'150px':'90px'}"></colgroup><thead><tr><th>順位</th><th>MCID</th><th style="text-align:right; padding-right:7px">${valueHead}</th></tr></thead><tbody>${rows}</tbody></table></div>${pager}`;
 }
 function progressMap(){
   const all=[];S.cats.forEach(c=>P(c.id).forEach(g=>all.push({c,g})));
@@ -294,7 +296,8 @@ function progressMap(){
   mapid=picked.g.id;
   const g=picked.g;
   const players=S.players.filter(p=>p.pr&&p.pr[g.id]);
-  const options=S.cats.map(c=>{const gs=P(c.id);return gs.length?`<optgroup label="${esc(c.name)}">${gs.map(x=>`<option value="${x.id}"${x.id===g.id?' selected':''}>${esc(x.name)}</option>`).join('')}</optgroup>`:''}).join('');
+  // Progress Map itself is selected by progress only; category (segment/rankup) is not a selection.
+  const options=all.map(x=>`<option value="${x.g.id}"${x.g.id===g.id?' selected':''}>${esc(x.g.name)}</option>`).join('');
   const firstPositive=g.st.findIndex(s=>s.e>0);
   const clearDate=p=>p.clear&&p.clear[g.id]||'';
   const playerCmp=(a,b)=>{const da=clearDate(a),db=clearDate(b);if(da&&db&&da!==db)return da.localeCompare(db);if(da&&!db)return -1;if(!da&&db)return 1;return a.name.localeCompare(b.name)};
@@ -479,7 +482,7 @@ function render(){
   if(admin&&dirty)try{localStorage.setItem('lb-draft',JSON.stringify(S))}catch(e){}
   const c=S.cats.find(x=>x.id===cat)||S.cats[0];cat=c&&c.id;
   let h=`<header style="justify-content:flex-end;position:relative"><div class="seg" style="margin:0;justify-content:flex-end">${dirty?'<button class="pri" data-a="pub" id="pub">data.jsを書き出す</button>':''}${admin?`<button data-a="view" data-id="admin" class="${view==='admin'?'on':''}">管理者メニュー</button>`:''}<button data-a="menu" aria-label="menu" class="${menu?'on':''}">☰</button></div>${menu?`<div class="dd">${[['board','leaderboard'],['list','prog role list'],['profile','profile'],['map','progress map']].map(([k,l])=>`<button data-a="view" data-id="${k}" class="${view===k?'on':''}">${l}</button>`).join('')}</div>`:''}</header>`;
-  if(view==='board')h+=`<div class="lb-controls"><div class="lb-group"><div class="lb-label">category</div><div class="seg">${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')||'<span class="mut">分野がありません</span>'}</div></div><div class="lb-group"><div class="lb-label">type</div><div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">exp</button><button data-a="mode" data-id="role" class="${mode==='role'?'on':''}">highest role</button></div></div></div>`;else if(view!=='profile')h+=`<nav>${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')}</nav>`;
+  if(view==='board')h+=`<div class="lb-controls"><div class="lb-group"><div class="lb-label">category</div><div class="seg">${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')||'<span class="mut">分野がありません</span>'}</div></div><div class="lb-group"><div class="lb-label">type</div><div class="seg"><button data-a="mode" data-id="pt" class="${mode==='pt'?'on':''}">exp</button><button data-a="mode" data-id="total" class="${mode==='total'?'on':''}">total exp</button><button data-a="mode" data-id="role" class="${mode==='role'?'on':''}">highest role</button></div></div></div>`;else if(view==='list')h+=`<nav>${S.cats.map(x=>`<button data-a="cat" data-id="${x.id}" class="${x.id===cat?'on':''}">${esc(x.name)}</button>`).join('')}</nav>`;
   if(view==='admin'&&admin)h+=adminPanel(c);
   else if(view==='profile')h+=profile();
   else if(view==='map')h+=progressMap();
