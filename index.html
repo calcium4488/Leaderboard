@@ -75,6 +75,12 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 .leaderboard-table td:nth-child(3) { text-align:right; padding-right:7px; }
 .leaderboard-table .leaderboard-role { text-align:right !important; white-space:nowrap !important; }
 
+/* MCID / Reference Video inputs: keep text clearly readable */
+.ac-wrap>input,
+.video-url-input { color:#000 !important; }
+.ac-wrap>input::placeholder,
+.video-url-input::placeholder { color:#000 !important; opacity:.55; }
+
 /* MCID autocomplete */
 .ac-wrap{position:relative;flex:1;min-width:220px}
 .ac-wrap>input{width:100%}
@@ -98,7 +104,7 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 <script>
 const S=window.DATA||{title:'leaderboard',cats:[],progs:[],players:[]};
 mig(S);
-let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
+let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',profileQuery='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
 
 // 公開ビューを共有 data.js と自動同期
 let lastSharedData='';
@@ -145,7 +151,9 @@ const videoThumb=url=>{
   return m?`https://img.youtube.com/vi/${m[1]}/hqdefault.jpg`:'';
 };
 const videoLink=url=>{
-  try{const u=new URL(url,location.href);return /^https?:$/i.test(u.protocol)?u.href:''}catch(e){return '';}
+  const raw=String(url||'').trim();
+  if(!raw)return '';
+  try{const u=new URL(raw,location.href);return /^https?:$/i.test(u.protocol)?u.href:''}catch(e){return '';}
 };
 const isVictorProgress=(g,sid)=>{const s=g&&g.st.find(x=>x.id===sid);const r=s&&g.roles.find(x=>x.at===sid);return !!(s&&(/^victor$/i.test(s.n||'')||/^victor$/i.test(r&&r.n||'')));};
 const isRankupProgress=g=>{const c=S.cats.find(x=>x.id===g?.c);return !!(c&&/rankup/i.test(c.name||''));};
@@ -326,7 +334,7 @@ function lvTable(c){
 function profile(){
   const ps=[...S.players].sort((a,b)=>a.name.localeCompare(b.name));
   const p=S.players.find(x=>x.id===pid);
-  let h=`<div class="row"><div class="ac-wrap" data-ac-target="profile"><input id="pq" list="pl" placeholder="MCID" autocomplete="off" value="${p?esc(p.name):''}" data-c="pick" data-ac-input="mcid"><datalist id="pl">${ps.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist><div class="ac-suggestions" data-ac-list></div></div></div>`;
+  let h=`<div class="row"><div class="ac-wrap" data-ac-target="profile"><input id="pq" type="search" name="mcid-profile-search" placeholder="MCID" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-form-type="other" data-lpignore="true" data-1p-ignore="true" value="${p?esc(p.name):esc(profileQuery)}" data-c="pick" data-ac-input="mcid"><div class="ac-suggestions" data-ac-list></div></div></div>`;
   if(!p)return h+'<p class="mut">MCIDを入力または選択してください。</p>';
   const tl=[];
   const secs=S.cats.map(c=>{
@@ -378,7 +386,7 @@ function adminPanel(c){
     const p=S.players.find(x=>x.id===ap);
     h+=`<p class="mut">① MCIDを追加 → ② 一覧からMCIDを選ぶ → ③ progressを選び、進捗(stage)を設定。条件に合うロールは自動で付きます。</p>
     <div class="row"><input id="np" placeholder="MCID"><button class="pri" data-a="addPl">追加</button></div>
-    <div class="row"><div class="ac-wrap" data-ac-target="admin"><input id="aq" list="apl" placeholder="MCIDを検索・選択" autocomplete="off" value="${p?esc(p.name):''}" data-c="apick" data-ac-input="mcid"><datalist id="apl">${[...S.players].sort((x,y)=>x.name.localeCompare(y.name)).map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist><div class="ac-suggestions" data-ac-list></div></div></div>`;
+    <div class="row"><div class="ac-wrap" data-ac-target="admin"><input id="aq" type="search" name="mcid-admin-search" placeholder="MCIDを検索・選択" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-form-type="other" data-lpignore="true" data-1p-ignore="true" value="${p?esc(p.name):''}" data-c="apick" data-ac-input="mcid"><div class="ac-suggestions" data-ac-list></div></div></div>`;
     if(p){
       p.pr=p.pr||{};
       h+=`<div class="item"><div class="hd"><input value="${esc(p.name)}" data-c="rename" data-id="${p.id}">${delBtn('delPl',p.id)}</div>`;
@@ -461,7 +469,7 @@ function setupAutocomplete(root){
       list.innerHTML=hits.length?hits.map(p=>`<button type="button" class="ac-suggestion" data-a="acPick" data-id="${p.id}">${esc(p.name)}</button>`).join(''):'<div class="ac-empty">一致するMCIDがありません</div>';
       list.classList.add('on');
     };
-    input.addEventListener('input',show);
+    input.addEventListener('input',()=>{ if(w.dataset.acTarget==='profile') profileQuery=input.value; show(); });
     input.addEventListener('focus',show);
     input.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
     document.addEventListener('click',e=>{if(!w.contains(e.target))close()});
@@ -496,7 +504,7 @@ const A={
   mvSt(id,el){const f=fs(id);if(!f)return;const j=f.i+ +el.dataset.d;if(j<0||j>=f.g.st.length)return;[f.g.st[f.i],f.g.st[j]]=[f.g.st[j],f.g.st[f.i]];dirty=true},
   delSt(id){if(arm(id))return;const f=fs(id);if(!f)return;const prev=f.g.st[f.i-1];f.g.st.splice(f.i,1);const nx=f.g.st[f.i]||prev;f.g.roles=f.g.roles.filter(r=>{if(r.at!==id)return true;if(!nx)return false;r.at=nx.id;return true});S.players.forEach(p=>{if(p.pr&&p.pr[f.g.id]===id){if(prev)p.pr[f.g.id]=prev.id;else delete p.pr[f.g.id];if(p.clear)delete p.clear[f.g.id]}});dirty=true},
   rmPr(id,el){const p=S.players.find(x=>x.id===el.dataset.p);if(p&&p.pr){delete p.pr[id];if(p.clear)delete p.clear[id]}dirty=true},
-  view(id){view=id;menu=false;if(id==='map'&&!mapid){const first=S.cats.flatMap(c=>P(c.id));if(first[0])mapid=first[0].id}},menu(){menu=!menu},selPl(id){ap=id},apick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());ap=p?p.id:''},prof(id){pid=id;view='profile'},acPick(id,el){const p=S.players.find(x=>x.id===id),w=el.closest('.ac-wrap'),inp=w&&w.querySelector('[data-ac-input]');if(!p||!inp)return;inp.value=p.name;if(w.dataset.acTarget==='admin'){ap=p.id}else{pid=p.id;view='profile'}},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
+  view(id){view=id;menu=false;if(id==='map'&&!mapid){const first=S.cats.flatMap(c=>P(c.id));if(first[0])mapid=first[0].id}},menu(){menu=!menu},selPl(id){ap=id},apick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());ap=p?p.id:''},prof(id){pid=id;view='profile'},acPick(id,el){const p=S.players.find(x=>x.id===id),w=el.closest('.ac-wrap'),inp=w&&w.querySelector('[data-ac-input]');if(!p||!inp)return;inp.value=p.name;if(w.dataset.acTarget==='admin'){ap=p.id}else{profileQuery=p.name;pid=p.id;view='profile'}},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
   addCat(){const n=v('nc');if(n){const id=uid();S.cats.push({id,name:n});cat=id;dirty=true}},
   addPl(){const n=v('np');if(!n)return;if(!okId(n))return void(msg=ERR);if(dup(n))return void(msg='同じMCIDは追加できません。');const q={id:uid(),name:n,pr:{},clear:{},fails:{},country:''};S.players.push(q);ap=q.id;dirty=true},
   delCat(id){if(arm(id))return;S.cats=S.cats.filter(c=>c.id!==id);{const ids=S.progs.filter(g=>g.c===id).map(g=>g.id);S.progs=S.progs.filter(g=>g.c!==id);S.players.forEach(p=>ids.forEach(i=>{if(p.pr)delete p.pr[i];if(p.clear)delete p.clear[i]}))}dirty=true},
@@ -529,7 +537,7 @@ const C={
   setst(id,el){const p=S.players.find(x=>x.id===el.dataset.p),g=gp(id);if(p){p.pr=p.pr||{};if(el.value)p.pr[id]=el.value;else delete p.pr[id];if(!el.value||!isVictorProgress(g,el.value)){if(p.clear)delete p.clear[id]}dirty=true}},
   clearDate(id,el){const p=S.players.find(x=>x.id===el.dataset.p),v=normalizeDateInput(el.value);if(p){if(el.value.trim()&&!v){msg='日付は YYYY/MM/DD 形式で入力してください。';return}p.clear=p.clear||{};if(v)p.clear[id]=v;else delete p.clear[id];dirty=true}},
   addpg(_,el){const p=S.players.find(x=>x.id===ap);if(p&&el.value){(p.pr=p.pr||{})[el.value]='';dirty=true}},
-  pick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());pid=p?p.id:''},
+  pick(_,el){profileQuery=el.value;const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());pid=p?p.id:''},
   rename(id,el){const n=el.value.trim();if(!n)return;if(!okId(n)){msg=ERR;return}if(dup(n,id)){msg='同じMCIDがいるため変更できません。';return}S.players.find(p=>p.id===id).name=n;dirty=true},
   title(_,el){S.title=el.value.trim()||S.title;dirty=true},
   mapPg(_,el){mapid=el.value}
