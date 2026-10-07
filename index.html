@@ -74,6 +74,23 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 .leaderboard-table th:nth-child(3),
 .leaderboard-table td:nth-child(3) { text-align:right; padding-right:7px; }
 .leaderboard-table .leaderboard-role { text-align:right !important; white-space:nowrap !important; }
+
+/* MCID autocomplete */
+.ac-wrap{position:relative;flex:1;min-width:220px}
+.ac-wrap>input{width:100%}
+.ac-suggestions{position:absolute;z-index:1000;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:240px;overflow:auto;display:none}
+.ac-suggestions.on{display:block}
+.ac-suggestion{display:block;width:100%;padding:10px 12px;border:0;background:transparent;text-align:left;color:var(--fg);cursor:pointer;font-size:14px}
+.ac-suggestion:hover,.ac-suggestion:focus{background:var(--bg)}
+.ac-empty{padding:10px 12px;color:var(--mut);font-size:13px}
+.map-reference{padding:12px 14px;margin-bottom:12px;text-align:center;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.map-reference-title{font-weight:700;margin-bottom:8px}
+.map-reference-none{color:var(--mut)}
+.map-reference-link{display:inline-flex;flex-direction:column;align-items:center;gap:7px;color:var(--fg);text-decoration:none;max-width:100%}
+.map-reference-link:hover{text-decoration:underline}
+.map-reference-thumb{display:block;width:min(560px,100%);max-height:315px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.map-reference-url{font-size:13px;overflow-wrap:anywhere}
+.video-url-input{flex:1;min-width:240px}.map-note{margin-top:12px;padding:10px 14px;text-align:left;border-top:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.map-note-title{font-weight:700;margin-bottom:4px}
 </style></head>
 <body>
 <div id="app"></div>
@@ -121,6 +138,15 @@ const releaseLabel=d=>{if(!d)return '';const x=new Date(d+'T00:00:00');return is
 const dateLabel=d=>{if(!d)return '';const x=new Date(d+'T00:00:00');return isNaN(x)?'':x.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});};
 const dateInputValue=d=>{if(!d)return '';const m=String(d).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[1]}/${m[2]}/${m[3]}`:String(d);};
 const normalizeDateInput=v=>{const x=String(v||'').trim().replace(/[.\-]/g,'/');let m=x.match(/^(\d{4})\/?(\d{1,2})\/?(\d{1,2})$/);if(!m){m=x.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)m=[m[0],m[3],m[1],m[2]];}if(!m)return '';const y=+m[1],mo=+m[2],d=+m[3],dt=new Date(y,mo-1,d);return y>=1900&&dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===d?`${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`:'';};
+const videoUrl=g=>String(g&&g.videoUrl||'').trim();
+const videoThumb=url=>{
+  const u=String(url||'').trim();
+  let m=u.match(/(?:youtube\.com\/watch\?[^#]*v=|youtube\.com\/shorts\/|youtu\.be\/)([A-Za-z0-9_-]{11})/i);
+  return m?`https://img.youtube.com/vi/${m[1]}/hqdefault.jpg`:'';
+};
+const videoLink=url=>{
+  try{const u=new URL(url,location.href);return /^https?:$/i.test(u.protocol)?u.href:''}catch(e){return '';}
+};
 const isVictorProgress=(g,sid)=>{const s=g&&g.st.find(x=>x.id===sid);const r=s&&g.roles.find(x=>x.at===sid);return !!(s&&(/^victor$/i.test(s.n||'')||/^victor$/i.test(r&&r.n||'')));};
 const isRankupProgress=g=>{const c=S.cats.find(x=>x.id===g?.c);return !!(c&&/rankup/i.test(c.name||''));};
 const rankupFailLabel=g=>String(g&&g.rankupFailLabel||'sky').trim()||'sky';
@@ -203,6 +229,7 @@ function roleOf(g,sid){const i=g.st.findIndex(s=>s.id===sid);if(i<0)return null;
 function mig(S){
   (S.players||[]).forEach(p=>{p.pr=p.pr||{};p.clear=p.clear||{};p.fails=p.fails||{};if(p.country===undefined)p.country=""});
   S.settings=S.settings||{};
+  (S.progs||[]).forEach(g=>{if(g.videoUrl===undefined)g.videoUrl=''});
   if(!Number.isFinite(Number(S.settings.pageSize))||Number(S.settings.pageSize)<1)S.settings.pageSize=50;
   S.settings.pageSize=50;
   if(S.progs){normR(S);const legacy=String(S.settings.rankupFailLabel||'').trim();S.progs.forEach(g=>{if(/rankup/i.test((S.cats.find(c=>c.id===g.c)||{}).name||'')&&!String(g.rankupFailLabel||'').trim())g.rankupFailLabel=legacy||'sky'});delete S.settings.rankupFailLabel;return}
@@ -282,7 +309,12 @@ function progressMap(){
   const rel=releaseLabel(g.release);
   const releaseRow=rel?`<tr class="map-victor-release"><td colspan="2">📅 Released on ${esc(rel)} 📅</td></tr>`:'';
   const victorBlock=victorRole?`<tr class="map-victor-head"><td colspan="2"><span class="map-role-name">${pn({name:victorTitle,col:rcol(g,victorRole)})}</span></td></tr>${releaseRow}<tr><td colspan="2" class="map-victor-players">${victorText}</td></tr>`:'';
-  return `<div class="row"><select data-c="mapPg" id="mapPg"><option value="">progressを選択</option>${options}</select></div><div class="map-card card"><div class="map-title">${esc(g.name)}</div><table class="map-table"><tbody>${rows}${victorBlock||(!rows?'<tr><td class="map-empty">stageがありません。</td></tr>':'')}</tbody></table></div>`;
+  const vu=videoLink(videoUrl(g));
+  const thumb=vu&&videoThumb(vu);
+  const reference=vu?`<div class="map-reference"><div class="map-reference-title">Reference Video</div><a class="map-reference-link" href="${esc(vu)}" target="_blank" rel="noopener noreferrer">${thumb?`<img class="map-reference-thumb" src="${esc(thumb)}" alt="Reference video thumbnail" loading="lazy">`:''}<span class="map-reference-url">${esc(vu)}</span></a></div>`:`<div class="map-reference"><div class="map-reference-title">Reference Video</div><div class="map-reference-none">[No videos have been made of the course]</div></div>`;
+  const note=String(g.note||'').trim();
+  const noteBlock=note?`<div class="map-note"><div class="map-note-title">Note</div><div>${esc(note)}</div></div>`:'';
+  return `<div class="row"><select data-c="mapPg" id="mapPg"><option value="">progressを選択</option>${options}</select></div>${reference}<div class="map-card card"><div class="map-title">${esc(g.name)}</div><table class="map-table"><tbody>${rows}${victorBlock||(!rows?'<tr><td class="map-empty">stageがありません。</td></tr>':'')}</tbody></table></div>${noteBlock}`;
 }
 function lvTable(c){
   const rows=[];
@@ -294,7 +326,7 @@ function lvTable(c){
 function profile(){
   const ps=[...S.players].sort((a,b)=>a.name.localeCompare(b.name));
   const p=S.players.find(x=>x.id===pid);
-  let h=`<div class="row"><input id="pq" list="pl" placeholder="MCID" value="${p?esc(p.name):''}" data-c="pick"><datalist id="pl">${ps.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></div>`;
+  let h=`<div class="row"><div class="ac-wrap" data-ac-target="profile"><input id="pq" list="pl" placeholder="MCID" autocomplete="off" value="${p?esc(p.name):''}" data-c="pick" data-ac-input="mcid"><datalist id="pl">${ps.map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist><div class="ac-suggestions" data-ac-list></div></div></div>`;
   if(!p)return h+'<p class="mut">MCIDを入力または選択してください。</p>';
   const tl=[];
   const secs=S.cats.map(c=>{
@@ -320,7 +352,7 @@ function progEd(g){
     `<div class="ai"><button data-a="mvSt" data-id="${s.id}" data-d="-1">↑</button><button data-a="mvSt" data-id="${s.id}" data-d="1">↓</button><input class="lv" value="${esc(s.n)}" placeholder="stage" data-c="stn" data-id="${s.id}"><input type="number" min="0" value="${s.e}" data-c="ste" data-id="${s.id}">exp${delBtn('delSt',s.id)}</div>`).join('');
   const rf=n?`<div class="row" style="margin-top:6px"><input id="rn_${g.id}" placeholder="ロール名 例: VICTOR"><select id="rs_${g.id}">${so('')}</select><button class="pri" data-a="addRole" data-id="${g.id}">ロールを作成</button></div>`:'<p class="mut">先にstageを追加してください。</p>';
   return `<div class="item pg">${head}
-    <div class="sec"><div class="sh">基本</div><div class="hd"><input value="${esc(g.name)}" data-c="pgn" data-id="${g.id}">${delBtn('delProg',g.id)}</div><div class="mut" style="margin-top:4px">表示色(progress全体)</div>${clSel(g)}<div class="country-row"><label>VICTOR公開日 <input class="date-entry" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" value="${esc(dateInputValue(g.release||''))}" data-c="release" data-id="${g.id}"></label><small>例: 2025/01/27（VICTOR欄に表示）</small></div>${isRankupProgress(g)?`<div class="country-row"><label>VICTOR fails表記 <input value="${esc(rankupFailLabel(g))}" placeholder="sky" data-c="rankupFailLabel" data-id="${g.id}"></label><small>このProgress Mapだけに適用されます。例: sky → 4 sky fails / 1 sky fail</small></div>`:''}</div>
+    <div class="sec"><div class="sh">基本</div><div class="hd"><input value="${esc(g.name)}" data-c="pgn" data-id="${g.id}">${delBtn('delProg',g.id)}</div><div class="country-row"><label style="flex:1">参考動画 <input class="video-url-input" type="url" placeholder="動画URL（YouTubeなど）" value="${esc(videoUrl(g))}" data-c="videoUrl" data-id="${g.id}"></label><small>Progress Mapの表の上に表示します。未設定の場合は指定のメッセージを表示します。</small></div><div class="country-row"><label style="flex:1">Note <textarea class="video-url-input" rows="3" placeholder="Progress Mapの表の下に表示するNote" data-c="note" data-id="${g.id}">${esc(g.note||'')}</textarea></label><small>未入力の場合、Progress Mapには表示されません。</small></div><div class="mut" style="margin-top:4px">表示色(progress全体)</div>${clSel(g)}<div class="country-row"><label>VICTOR公開日 <input class="date-entry" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" value="${esc(dateInputValue(g.release||''))}" data-c="release" data-id="${g.id}"></label><small>例: 2025/01/27（VICTOR欄に表示）</small></div>${isRankupProgress(g)?`<div class="country-row"><label>VICTOR fails表記 <input value="${esc(rankupFailLabel(g))}" placeholder="sky" data-c="rankupFailLabel" data-id="${g.id}"></label><small>このProgress Mapだけに適用されます。例: sky → 4 sky fails / 1 sky fail</small></div>`:''}</div>
     <div class="sec"><div class="sh">全体の流れ(上から下へ、易しい順)</div>${rows||'<p class="mut">stageを追加してください。</p>'}<div class="row" style="margin-top:6px"><input id="sn_${g.id}" placeholder="stage 例: s1"><input id="se_${g.id}" type="number" min="0" placeholder="exp" style="width:80px"><button class="pri" data-a="addSt" data-id="${g.id}">stageを追加</button></div></div>
     <div class="sec"><div class="sh">ロール</div><p class="mut">VICTORのようなロールを、名前を付けて作成します。ロールは、選んだstageから次のロールの手前まで続きます(帯が位置を表します)。途中経過のロールも含め、帯の中で色を変えられます(未設定ならprogressの色)。</p>${rf}</div></div>`}
 function prRow(p,g){
@@ -346,7 +378,7 @@ function adminPanel(c){
     const p=S.players.find(x=>x.id===ap);
     h+=`<p class="mut">① MCIDを追加 → ② 一覧からMCIDを選ぶ → ③ progressを選び、進捗(stage)を設定。条件に合うロールは自動で付きます。</p>
     <div class="row"><input id="np" placeholder="MCID"><button class="pri" data-a="addPl">追加</button></div>
-    <div class="row"><input id="aq" list="apl" placeholder="MCIDを検索・選択" value="${p?esc(p.name):''}" data-c="apick"><datalist id="apl">${[...S.players].sort((x,y)=>x.name.localeCompare(y.name)).map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist></div>`;
+    <div class="row"><div class="ac-wrap" data-ac-target="admin"><input id="aq" list="apl" placeholder="MCIDを検索・選択" autocomplete="off" value="${p?esc(p.name):''}" data-c="apick" data-ac-input="mcid"><datalist id="apl">${[...S.players].sort((x,y)=>x.name.localeCompare(y.name)).map(x=>`<option value="${esc(x.name)}">`).join('')}</datalist><div class="ac-suggestions" data-ac-list></div></div></div>`;
     if(p){
       p.pr=p.pr||{};
       h+=`<div class="item"><div class="hd"><input value="${esc(p.name)}" data-c="rename" data-id="${p.id}">${delBtn('delPl',p.id)}</div>`;
@@ -414,6 +446,27 @@ function fitGrad(root){
 let fitRaf=0;
 window.addEventListener('resize',()=>{cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(()=>fitGrad())});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitGrad());
+function setupAutocomplete(root){
+  const scope=root||document;
+  scope.querySelectorAll('.ac-wrap[data-ac-target]').forEach(w=>{
+    const input=w.querySelector('[data-ac-input]');
+    const list=w.querySelector('[data-ac-list]');
+    if(!input||!list||input.dataset.acBound)return;
+    input.dataset.acBound='1';
+    const close=()=>{list.classList.remove('on');list.innerHTML=''};
+    const show=()=>{
+      const q=input.value.trim().toLowerCase();
+      const ps=[...S.players].sort((a,b)=>a.name.localeCompare(b.name));
+      const hits=ps.filter(p=>!q||p.name.toLowerCase().includes(q)).slice(0,8);
+      list.innerHTML=hits.length?hits.map(p=>`<button type="button" class="ac-suggestion" data-a="acPick" data-id="${p.id}">${esc(p.name)}</button>`).join(''):'<div class="ac-empty">一致するMCIDがありません</div>';
+      list.classList.add('on');
+    };
+    input.addEventListener('input',show);
+    input.addEventListener('focus',show);
+    input.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+    document.addEventListener('click',e=>{if(!w.contains(e.target))close()});
+  });
+}
 function render(){
   if(admin&&dirty)try{localStorage.setItem('lb-draft',JSON.stringify(S))}catch(e){}
   const c=S.cats.find(x=>x.id===cat)||S.cats[0];cat=c&&c.id;
@@ -427,6 +480,7 @@ function render(){
   else h+=table(c);
   $('#app').innerHTML=h;
   fitGrad($('#app'));
+  setupAutocomplete($('#app'));
 }
 
 // 公開ページは5秒ごとに共有データを確認
@@ -442,7 +496,7 @@ const A={
   mvSt(id,el){const f=fs(id);if(!f)return;const j=f.i+ +el.dataset.d;if(j<0||j>=f.g.st.length)return;[f.g.st[f.i],f.g.st[j]]=[f.g.st[j],f.g.st[f.i]];dirty=true},
   delSt(id){if(arm(id))return;const f=fs(id);if(!f)return;const prev=f.g.st[f.i-1];f.g.st.splice(f.i,1);const nx=f.g.st[f.i]||prev;f.g.roles=f.g.roles.filter(r=>{if(r.at!==id)return true;if(!nx)return false;r.at=nx.id;return true});S.players.forEach(p=>{if(p.pr&&p.pr[f.g.id]===id){if(prev)p.pr[f.g.id]=prev.id;else delete p.pr[f.g.id];if(p.clear)delete p.clear[f.g.id]}});dirty=true},
   rmPr(id,el){const p=S.players.find(x=>x.id===el.dataset.p);if(p&&p.pr){delete p.pr[id];if(p.clear)delete p.clear[id]}dirty=true},
-  view(id){view=id;menu=false;if(id==='map'&&!mapid){const first=S.cats.flatMap(c=>P(c.id));if(first[0])mapid=first[0].id}},menu(){menu=!menu},selPl(id){ap=id},apick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());ap=p?p.id:''},prof(id){pid=id;view='profile'},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
+  view(id){view=id;menu=false;if(id==='map'&&!mapid){const first=S.cats.flatMap(c=>P(c.id));if(first[0])mapid=first[0].id}},menu(){menu=!menu},selPl(id){ap=id},apick(_,el){const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());ap=p?p.id:''},prof(id){pid=id;view='profile'},acPick(id,el){const p=S.players.find(x=>x.id===id),w=el.closest('.ac-wrap'),inp=w&&w.querySelector('[data-ac-input]');if(!p||!inp)return;inp.value=p.name;if(w.dataset.acTarget==='admin'){ap=p.id}else{pid=p.id;view='profile'}},cat(id){cat=id;page=0},mode(id){mode=id;page=0},pg(id){page+=+id},tab(id){tab=id},
   addCat(){const n=v('nc');if(n){const id=uid();S.cats.push({id,name:n});cat=id;dirty=true}},
   addPl(){const n=v('np');if(!n)return;if(!okId(n))return void(msg=ERR);if(dup(n))return void(msg='同じMCIDは追加できません。');const q={id:uid(),name:n,pr:{},clear:{},fails:{},country:''};S.players.push(q);ap=q.id;dirty=true},
   delCat(id){if(arm(id))return;S.cats=S.cats.filter(c=>c.id!==id);{const ids=S.progs.filter(g=>g.c===id).map(g=>g.id);S.progs=S.progs.filter(g=>g.c!==id);S.players.forEach(p=>ids.forEach(i=>{if(p.pr)delete p.pr[i];if(p.clear)delete p.clear[i]}))}dirty=true},
@@ -471,6 +525,7 @@ const C={
   release(id,el){const g=gp(id),v=normalizeDateInput(el.value);if(g){if(el.value.trim()&&!v){msg='日付は YYYY/MM/DD 形式で入力してください。';return}g.release=v;dirty=true}},
   fails(id,el){const p=S.players.find(x=>x.id===el.dataset.p),g=gp(id);if(!p||!g||!isRankupProgress(g)||!isVictorProgress(g,p.pr&&p.pr[g.id]))return;p.fails=p.fails||{};const n=String(el.value||'').trim();if(!n){delete p.fails[id]}else{const v=Math.floor(Number(n));if(Number.isFinite(v)&&v>=0)p.fails[id]=v}dirty=true},
   rankupFailLabel(id,el){const g=gp(id);if(g&&isRankupProgress(g)){g.rankupFailLabel=el.value.trim()||'sky';dirty=true}},
+  videoUrl(id,el){const g=gp(id),u=videoLink(el.value.trim());if(g){if(el.value.trim()&&!u){msg='有効な動画URLを入力してください。';return}g.videoUrl=u;dirty=true}},  note(id,el){const g=gp(id);if(g){g.note=String(el.value||'').trim();dirty=true}},
   setst(id,el){const p=S.players.find(x=>x.id===el.dataset.p),g=gp(id);if(p){p.pr=p.pr||{};if(el.value)p.pr[id]=el.value;else delete p.pr[id];if(!el.value||!isVictorProgress(g,el.value)){if(p.clear)delete p.clear[id]}dirty=true}},
   clearDate(id,el){const p=S.players.find(x=>x.id===el.dataset.p),v=normalizeDateInput(el.value);if(p){if(el.value.trim()&&!v){msg='日付は YYYY/MM/DD 形式で入力してください。';return}p.clear=p.clear||{};if(v)p.clear[id]=v;else delete p.clear[id];dirty=true}},
   addpg(_,el){const p=S.players.find(x=>x.id===ap);if(p&&el.value){(p.pr=p.pr||{})[el.value]='';dirty=true}},
