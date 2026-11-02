@@ -110,7 +110,7 @@ tr.rb td{text-align:center;border-top:2px dashed var(--line);border-bottom:2px d
 <script>
 const S=window.DATA||{title:'leaderboard',cats:[],progs:[],players:[]};
 mig(S);
-let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',profileQuery='',ap='',mapid='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
+let admin=!!window.IS_ADMIN,art=null,dirty=false,cat=S.cats[0]&&S.cats[0].id,mode='pt',view='board',pid='',profileQuery='',ap='',mapid='',mapcat='',menu=false,og={},tab='pl',page=0,PS=50,armed='',msg='';
 
 // 公開ビューを共有 data.js と自動同期
 let lastSharedData='';
@@ -298,15 +298,28 @@ function table(c){
 function progressMap(){
   const all=[];S.cats.forEach(c=>P(c.id).forEach(g=>all.push({c,g})));
   if(!all.length)return '<p class="mut">progressがまだありません。</p>';
-  const picked=all.find(x=>x.g.id===mapid)||all[0];
+  const current=all.find(x=>x.g.id===mapid);
+  if(!mapcat || !S.cats.some(c=>c.id===mapcat))mapcat=(current&&current.c.id)||S.cats[0].id;
+  let categoryMaps=all.filter(x=>x.c.id===mapcat);
+  if(!categoryMaps.length){
+    mapcat=(S.cats[0]&&S.cats[0].id)||'';
+    categoryMaps=all.filter(x=>x.c.id===mapcat);
+  }
+  let picked=categoryMaps.find(x=>x.g.id===mapid)||categoryMaps[0]||all[0];
+  if(picked.c.id!==mapcat){mapcat=picked.c.id;categoryMaps=all.filter(x=>x.c.id===mapcat);}
   mapid=picked.g.id;
   const g=picked.g;
   const players=S.players.filter(p=>p.pr&&p.pr[g.id]);
-  // Progress Map choices are grouped by category for easier selection.
-  const mapGroups={segment:[],rankup:[]};
-  all.forEach(x=>{/rankup/i.test((x.c&&x.c.name)||'')?mapGroups.rankup.push(x):mapGroups.segment.push(x)});
+  // Main/Extra classification is applied only inside the selected category.
+  const mapGroups={'main':[],'extra':[]};
+  categoryMaps.forEach(x=>{
+    const stages=(x.g.st||[]).filter(s=>!/^victor$/i.test(s.n||''));
+    const type=stages.some(s=>Number(s.e)>0)?'main':'extra';
+    mapGroups[type].push(x);
+  });
   const mapGroupOptions=(label,list)=>list.length?`<optgroup label="${label}">${list.map(x=>`<option value="${x.g.id}"${x.g.id===g.id?' selected':''}>${esc(x.g.name)}</option>`).join('')}</optgroup>`:'';
-  const options=mapGroupOptions('segment',mapGroups.segment)+mapGroupOptions('rankup',mapGroups.rankup);
+  const options=mapGroupOptions('Main',mapGroups.main)+mapGroupOptions('Extra',mapGroups.extra);
+  const categoryOptions=S.cats.map(c=>`<option value="${c.id}"${c.id===mapcat?' selected':''}>${esc(c.name)}</option>`).join('');
   const firstPositive=g.st.findIndex(s=>s.e>0);
   const clearDate=p=>p.clear&&p.clear[g.id]||'';
   const playerCmp=(a,b)=>{const da=clearDate(a),db=clearDate(b);if(da&&db&&da!==db)return da.localeCompare(db);if(da&&!db)return -1;if(!da&&db)return 1;return a.name.localeCompare(b.name)};
@@ -334,7 +347,7 @@ function progressMap(){
   const reference=vu?`<div class="map-reference"><div class="map-reference-title">Reference Video</div><a class="map-reference-link" href="${esc(vu)}" target="_blank" rel="noopener noreferrer">${thumb?`<img class="map-reference-thumb" src="${esc(thumb)}" alt="Reference video thumbnail" loading="lazy">`:''}<span class="map-reference-url">${esc(vu)}</span></a></div>`:`<div class="map-reference"><div class="map-reference-title">Reference Video</div><div class="map-reference-none">[No videos have been made of the course]</div></div>`;
   const note=String(g.note||'').trim();
   const noteBlock=note?`<div class="map-note"><div class="map-note-title">Note</div><div>${esc(note)}</div></div>`:'';
-  return `<div class="row"><select data-c="mapPg" id="mapPg"><option value="">progressを選択</option>${options}</select></div>${reference}<div class="map-card card"><div class="map-title">${esc(g.name)}</div><table class="map-table"><tbody>${rows}${victorBlock||(!rows?'<tr><td class="map-empty">stageがありません。</td></tr>':'')}</tbody></table></div>${noteBlock}`;
+  return `<div class="row"><select data-c="mapCat" id="mapCat" aria-label="segment / rankup">${categoryOptions}</select><select data-c="mapPg" id="mapPg"><option value="">progressを選択</option>${options}</select></div>${reference}<div class="map-card card"><div class="map-title">${esc(g.name)}</div><table class="map-table"><tbody>${rows}${victorBlock||(!rows?'<tr><td class="map-empty">stageがありません。</td></tr>':'')}</tbody></table></div>${noteBlock}`;
 }
 function lvTable(c){
   const rows=[];
@@ -378,7 +391,7 @@ function progEd(g){
 function prRow(p,g){
   const sid=p.pr[g.id],r=sid?roleOf(g,sid):null,cd=p.clear&&p.clear[g.id]||'',isVic=isVictorProgress(g,sid),isRankup=isRankupProgress(g),fails=victorFails(p,g);
   const failField=isRankup&&isVic?`<label class="mut">fails <input class="fails-entry" type="number" min="0" step="1" inputmode="numeric" placeholder="0" value="${fails===null?'':fails}" data-c="fails" data-p="${p.id}" data-id="${g.id}"></label>`:'';
-  return `<div class="gr"><span class="gl">${pn(g)}</span><select data-c="setst" data-p="${p.id}" data-id="${g.id}"><option value="">— 未着手</option>${g.st.map(s=>`<option value="${s.id}"${sid===s.id?' selected':''}>${esc(s.n||'—')} - ${s.e} exp</option>`).join('')}</select>${isVic?`<label class="mut">クリア日 <input class="date-entry" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" value="${esc(dateInputValue(cd))}" data-c="clearDate" data-p="${p.id}" data-id="${g.id}"></label>`:''}${failField}<small>${r?'ロール: '+esc(r.n||g.name):'ロールなし'}</small><button class="del" data-a="rmPr" data-p="${p.id}" data-id="${g.id}">外す</button></div>`
+  return `<div class="gr"><span class="gl">${pn(g)}</span><select data-c="setst" data-p="${p.id}" data-id="${g.id}"><option value="">— 未着手</option>${g.st.filter(s=>Number(s.e)>0).map(s=>`<option value="${s.id}"${sid===s.id?' selected':''}>${esc(s.n||'—')} - ${s.e} exp</option>`).join('')}</select>${isVic?`<label class="mut">クリア日 <input class="date-entry" type="text" inputmode="numeric" autocomplete="off" placeholder="YYYY/MM/DD" value="${esc(dateInputValue(cd))}" data-c="clearDate" data-p="${p.id}" data-id="${g.id}"></label>`:''}${failField}<small>${r?'ロール: '+esc(r.n||g.name):'ロールなし'}</small><button class="del" data-a="rmPr" data-p="${p.id}" data-id="${g.id}">外す</button></div>`
 }
 function adminPanel(c){
   const T=[['pl','MCID'],['ac','progress'],['ct','分野・設定'],['gh','公開設定']];
@@ -552,6 +565,7 @@ const C={
   pick(_,el){profileQuery=el.value;const p=S.players.find(x=>x.name.toLowerCase()===el.value.trim().toLowerCase());pid=p?p.id:''},
   rename(id,el){const n=el.value.trim();if(!n)return;if(!okId(n)){msg=ERR;return}if(dup(n,id)){msg='同じMCIDがいるため変更できません。';return}S.players.find(p=>p.id===id).name=n;dirty=true},
   title(_,el){S.title=el.value.trim()||S.title;dirty=true},
+  mapCat(_,el){mapcat=el.value;const first=P(mapcat)[0];mapid=first?first.id:''},
   mapPg(_,el){mapid=el.value}
 };
 $('#app').addEventListener('click',e=>{
